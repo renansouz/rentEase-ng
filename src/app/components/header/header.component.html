@@ -1,0 +1,76 @@
+<header class="bg-white shadow px-4 flex items-center justify-between">
+  <div class="flex items-center space-x-4">
+    <a routerLink="/" class="flex items-center">
+      <img src="rentease-logo.png" alt="RentEase logo" class="h-16" />
+    </a>
+    <span class="text-gray-700 text-sm">
+      Hi,
+      <span>{{ user.firstName }} {{ user.lastName }}</span>
+      !👋
+    </span>
+  </div>
+
+  <nav class="flex space-x-4">
+    <a
+      routerLink="/"
+      routerLinkActive="text-blue-500 font-semibold"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+    >
+      Home
+    </a>
+
+    <a
+      routerLink="/my-flats"
+      routerLinkActive="text-blue-500 font-semibold"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+    >
+      My Flats
+    </a>
+    <a
+      routerLink="/favorites"
+      routerLinkActive="text-blue-500 font-semibold"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+    >
+      Favorites
+    </a>
+    @if (user.isAdmin) {
+    <a
+      routerLink="/users"
+      routerLinkActive="text-blue-500 font-semibold"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+    >
+      All Users
+    </a>
+    }
+  </nav>
+
+  <div class="flex items-center space-x-4">
+    <button
+      [matMenuTriggerFor]="profileMenu"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600 flex items-center space-x-2"
+    >
+      Profile
+      <mat-icon>keyboard_arrow_down</mat-icon>
+    </button>
+
+    <mat-menu #profileMenu="matMenu">
+      <button
+        routerLink="/profile"
+        routerLinkActive="text-blue-600 font-semibold"
+        mat-menu-item
+      >
+        <mat-icon>person</mat-icon>
+        My Profile
+      </button>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+      <button mat-menu-item (click)="deleteAccount()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete Account</span>
+      </button>
+    </mat-menu>
+  </div>
+</header>

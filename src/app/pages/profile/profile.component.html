@@ -1,1 +1,23 @@
-<p>profile works!</p>
+@if (user()) {
+<mat-card class="max-w-md mx-auto mt-12 p-6">
+  <h2 class="text-2xl font-semibold mb-4">My Profile</h2>
+  <div class="space-y-2 text-gray-700">
+    <p><strong>Email:</strong> {{ user()?.email }}</p>
+    <p><strong>First Name:</strong> {{ user()?.firstName }}</p>
+    <p><strong>Last Name:</strong> {{ user()?.lastName }}</p>
+    <p>
+      <strong>Birth Date:</strong>
+      {{ formattedBirthDate }}
+    </p>
+  </div>
+  <button
+    mat-raised-button
+    class="mt-6 !bg-blue-500 !text-white"
+    (click)="edit()"
+  >
+    Edit Profile
+  </button>
+</mat-card>
+} @else {
+<p class="text-center mt-12">Loading profile…</p>
+}

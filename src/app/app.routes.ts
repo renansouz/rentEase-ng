@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 
-// import { AuthGuard } from './guards/auth.guard';
-// import { AdminGuard } from './guards/admin.guard';
+import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
+import { guestGuard } from './guards/guest.guard';
 
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
@@ -17,58 +18,58 @@ import { AllUsersComponent } from './pages/users/all-users/all-users.component';
 import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
 
   {
     path: '',
     component: HomeComponent,
-    // canActivate: [AuthGuard]
+    canActivate: [authGuard],
   },
   { path: 'home', redirectTo: '', pathMatch: 'full' },
   {
     path: 'flats/new',
     component: NewFlatComponent,
-    // canActivate: [AuthGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'flats/:id',
     component: FlatViewComponent,
-    // canActivate: [AuthGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'flats/:id/edit',
     component: EditFlatComponent,
 
-    // canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   {
     path: 'my-flats',
     component: MyFlatsComponent,
-    // canActivate: [AuthGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'favorites',
     component: FavoritesComponent,
 
-    // canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   {
     path: 'profile',
     component: ProfileComponent,
-    // canActivate: [AuthGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'profile/edit',
     component: ProfileEditComponent,
 
-    // canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
 
   {
     path: 'users',
     component: AllUsersComponent,
-    // canActivate: [AuthGuard, AdminGuard],
+    canActivate: [authGuard, adminGuard],
   },
 
   { path: '**', component: PageNotFoundComponent },

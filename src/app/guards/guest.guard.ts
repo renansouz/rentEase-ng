@@ -3,16 +3,18 @@ import { inject } from '@angular/core';
 import { Auth, authState } from '@angular/fire/auth';
 import { map, take } from 'rxjs';
 
-export const authGuard: CanActivateFn = () => {
+export const guestGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
 
   return authState(auth).pipe(
     take(1),
     map((user) => {
-      if (user) return true;
-      router.navigate(['/login']);
-      return false;
+      if (user) {
+        router.navigate(['/']);
+        return false;
+      }
+      return true;
     })
   );
 };

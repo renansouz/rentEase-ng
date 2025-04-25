@@ -1,1 +1,100 @@
-<p>register works!</p>
+<div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-xl">
+  <h2 class="text-2xl font-semibold mb-6">Create Your Account</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>First Name</mat-label>
+      <input matInput formControlName="firstName" />
+      @if (f.firstName.touched && f.firstName.hasError('required')) {
+      <mat-error>First name is required</mat-error>
+      } @else if (f.firstName.touched && f.firstName.hasError('minlength')) {
+      <mat-error>First name must be at least 2 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Last Name</mat-label>
+      <input matInput formControlName="lastName" />
+      @if (f.lastName.touched && f.lastName.hasError('required')) {
+      <mat-error>Last name is required</mat-error>
+      } @else if (f.lastName.touched && f.lastName.hasError('minlength')) {
+      <mat-error>Last name must be at least 2 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+      @if (f.email.touched && f.email.hasError('required')) {
+      <mat-error>Email is required</mat-error>
+      } @else if (f.email.touched && f.email.hasError('email')) {
+      <mat-error>Enter a valid email address</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Birth Date</mat-label>
+      <input matInput type="date" formControlName="birthDate" />
+      @if (f.birthDate.touched && f.birthDate.hasError('required')) {
+      <mat-error>Birth date is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        [type]="hidePassword ? 'password' : 'text'"
+        formControlName="password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hidePassword = !hidePassword"
+        [attr.aria-label]="'Toggle password visibility'"
+      >
+        <mat-icon>{{
+          hidePassword ? "visibility_off" : "visibility"
+        }}</mat-icon>
+      </button>
+      @if (f.password.touched && f.password.hasError('required')) {
+      <mat-error>Password is required</mat-error>
+      } @else if (f.password.touched && f.password.hasError('minlength')) {
+      <mat-error>Password must be at least 6 characters</mat-error>
+      } @else if (f.password.touched && f.password.hasError('passwordPattern'))
+      {
+      <mat-error>
+        Password must include letters, numbers, and a special character
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Confirm Password -->
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Confirm Password</mat-label>
+      <input
+        matInput
+        [type]="hidePassword ? 'password' : 'text'"
+        formControlName="confirmPassword"
+      />
+      @if (form.touched && form.hasError('passwordMismatch')) {
+      <mat-error>Passwords do not match</mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="w-full py-3 !bg-blue-500 !text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      type="submit"
+      [disabled]="form.invalid || (loading$ | async)"
+    >
+      Register
+    </button>
+
+    <p class="text-center text-sm text-gray-600">
+      Already have an account?
+      <a routerLink="/login" class="text-blue-500 hover:underline">Sign in</a>
+    </p>
+  </form>
+</div>

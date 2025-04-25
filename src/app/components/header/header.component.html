@@ -1,44 +1,43 @@
 <header class="bg-white shadow px-4 flex items-center justify-between">
+  @if (user()) {
   <div class="flex items-center space-x-4">
     <a routerLink="/" class="flex items-center">
-      <img src="rentease-logo.png" alt="RentEase logo" class="h-16" />
+      <img src="rentease-logo.png" alt="Ren Ease" class="h-16" />
     </a>
-    <span class="text-gray-700 text-sm">
-      Hi,
-      <span>{{ user.firstName }} {{ user.lastName }}</span>
-      !👋
+    <span class="text-gray-900 text-sm">
+      Hi, <span class="font-semibold">{{ user()?.firstName }}</span
+      >! 👋
     </span>
   </div>
 
   <nav class="flex space-x-4">
     <a
       routerLink="/"
-      routerLinkActive="text-blue-500 font-semibold"
+      routerLinkActive="!text-blue-500 font-semibold"
       [routerLinkActiveOptions]="{ exact: true }"
-      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-gray-600"
     >
       Home
     </a>
-
     <a
       routerLink="/my-flats"
-      routerLinkActive="text-blue-500 font-semibold"
-      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+      routerLinkActive="!text-blue-500 font-semibold"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-gray-600"
     >
       My Flats
     </a>
     <a
       routerLink="/favorites"
-      routerLinkActive="text-blue-500 font-semibold"
-      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+      routerLinkActive="!text-blue-500 font-semibold"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-gray-600"
     >
       Favorites
     </a>
-    @if (user.isAdmin) {
+    @if (user()?.isAdmin) {
     <a
-      routerLink="/users"
-      routerLinkActive="text-blue-500 font-semibold"
-      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600"
+      routerLink="/user()s"
+      routerLinkActive="!text-blue-500 font-semibold"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-gray-600"
     >
       All Users
     </a>
@@ -48,20 +47,16 @@
   <div class="flex items-center space-x-4">
     <button
       [matMenuTriggerFor]="profileMenu"
-      class="px-3 py-2 rounded hover:bg-gray-100 text-grey-600 flex items-center space-x-2"
+      class="px-3 py-2 rounded hover:bg-gray-100 text-gray-600 flex items-center space-x-2"
     >
       Profile
       <mat-icon>keyboard_arrow_down</mat-icon>
     </button>
 
     <mat-menu #profileMenu="matMenu">
-      <button
-        routerLink="/profile"
-        routerLinkActive="text-blue-600 font-semibold"
-        mat-menu-item
-      >
+      <button routerLink="/profile" mat-menu-item>
         <mat-icon>person</mat-icon>
-        My Profile
+        <span>My Profile</span>
       </button>
       <button mat-menu-item (click)="logout()">
         <mat-icon>logout</mat-icon>
@@ -73,4 +68,16 @@
       </button>
     </mat-menu>
   </div>
+  } @else {
+  <a routerLink="/" class="flex items-center">
+    <img src="rentease-logo.png" alt="Ren Ease" class="h-16" />
+  </a>
+  <button
+    routerLink="/login"
+    mat-button
+    class="text-gray-700 hover:text-blue-500"
+  >
+    Sign In
+  </button>
+  }
 </header>

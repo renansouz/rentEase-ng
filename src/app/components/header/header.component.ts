@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -6,9 +8,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { AuthService, UserProfile } from '../../services/auth.service';
+
 @Component({
   selector: 'app-header',
   imports: [
+    CommonModule,
     RouterLink,
     RouterLinkActive,
     MatMenuModule,
@@ -18,13 +23,17 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {
-  user = { firstName: 'Renan', lastName: 'Silva', isAdmin: true };
+  private auth = inject(AuthService);
+
+  user: Signal<UserProfile | null> = toSignal(this.auth.currentUser$, {
+    initialValue: null,
+  });
 
   logout() {
-    // TODO:  hook up my AuthService.logout()
+    this.auth.logout();
   }
 
   deleteAccount() {
-    // TODO:  hook up my AuthService.deleteAccount()
+    this.auth.deleteAccount();
   }
 }

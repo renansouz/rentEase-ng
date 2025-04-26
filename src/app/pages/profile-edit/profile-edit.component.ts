@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AuthService, UserProfile } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile-edit',
@@ -41,7 +41,7 @@ export class ProfileEditComponent {
         this.form.patchValue({
           firstName: profile.firstName,
           lastName: profile.lastName,
-          birthDate: profile.birthDate.toISOString().substring(0, 10), // yyyy-MM-dd
+          birthDate: profile.birthDate.toISOString().substring(0, 10),
         });
       }
     });

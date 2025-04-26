@@ -2,7 +2,7 @@
   @if (user()) {
   <div class="flex items-center space-x-4">
     <a routerLink="/" class="flex items-center">
-      <img src="rentease-logo.png" alt="Ren Ease" class="h-16" />
+      <img src="rentease-logo.png" alt="RentEase" class="h-16" />
     </a>
     <span class="text-gray-900 text-sm">
       Hi, <span class="font-semibold">{{ user()?.firstName }}</span
@@ -35,7 +35,7 @@
     </a>
     @if (user()?.isAdmin) {
     <a
-      routerLink="/user()s"
+      routerLink="/users"
       routerLinkActive="!text-blue-500 font-semibold"
       class="px-3 py-2 rounded hover:bg-gray-100 text-gray-600"
     >

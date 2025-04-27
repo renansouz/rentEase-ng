@@ -25,6 +25,7 @@ export interface Flat {
   rentPrice: number;
   availableDate: Date;
   createdAt?: Date;
+  photoUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })

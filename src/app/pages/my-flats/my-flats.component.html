@@ -1,1 +1,54 @@
-<p>my-flats works!</p>
+<div class="p-4">
+  @if (loading()) {
+  <div class="flex justify-center py-8">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+  } @else {
+  <h1 class="text-2xl font-semibold mb-2 text-center">My Flats</h1>
+  <p class="text-center text-gray-600 mb-8">
+    Here you can edit or delete your published flats.
+  </p>
+
+  <div class="flex flex-wrap gap-6 justify-center">
+    @if (flatsSignal()?.length === 0) {
+    <p class="text-gray-600">You haven't added any flats yet.</p>
+    } @else { @for (flat of flatsSignal(); track flat.id) {
+    <mat-card class="relative w-96 flex-shrink-0">
+      <div class="relative h-40 w-full overflow-hidden">
+        <img
+          mat-card-image
+          [src]="flat.photoUrl || 'fallback.png'"
+          alt="Flat photo"
+          class="h-40 w-full object-cover transition-opacity duration-500"
+        />
+      </div>
+
+      <mat-card-content class="!p-2 space-y-1">
+        <div class="flex justify-between pt-2">
+          <h3 class="text-lg font-medium">
+            {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
+          </h3>
+          <p class="text-gray-700">{{ flat.rentPrice | currency }}</p>
+        </div>
+        <p class="text-gray-600">
+          {{ flat.areaSize }} sqm · Built {{ flat.yearBuilt }}
+        </p>
+        <p class="text-gray-500">
+          Available:
+          {{ formatAvailableDate(flat) }}
+        </p>
+      </mat-card-content>
+
+      <mat-card-actions class="flex justify-between px-2 pb-2">
+        <button mat-button (click)="viewEdit(flat.id)">
+          <mat-icon class="mr-1">edit</mat-icon>Edit
+        </button>
+        <button mat-button color="warn" (click)="delete(flat.id)">
+          <mat-icon class="mr-1">delete</mat-icon>Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    } }
+  </div>
+  }
+</div>

@@ -1,1 +1,147 @@
-<p>new-flat works!</p>
+<div class="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-lg shadow">
+  <h2 class="text-3xl font-semibold text-center mb-8">Add New Flat</h2>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="grid grid-cols-1 md:grid-cols-2 gap-6"
+  >
+    <div class="md:col-span-2">
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>City</mat-label>
+        <input matInput formControlName="city" />
+        @if (f['city'].touched && f['city'].hasError('required')) {
+        <mat-error>City is required</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Street Name</mat-label>
+        <input matInput formControlName="streetName" />
+        @if (f['streetName'].touched && f['streetName'].hasError('required')) {
+        <mat-error>Street Name is required</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Street Number</mat-label>
+        <input matInput type="number" formControlName="streetNumber" />
+        @if (f['streetNumber'].touched &&
+        f['streetNumber'].hasError('required')) {
+        <mat-error>Street Number is required</mat-error>
+        } @else if (f['streetNumber'].touched &&
+        f['streetNumber'].hasError('min')) {
+        <mat-error>Must be at least 1</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Rent Price</mat-label>
+        <input matInput type="number" formControlName="rentPrice" />
+        @if (f['rentPrice'].touched && f['rentPrice'].hasError('required')) {
+        <mat-error>Rent Price is required</mat-error>
+        } @else if (f['rentPrice'].touched && f['rentPrice'].hasError('min')) {
+        <mat-error>Must be at least $1</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Available Date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="availableDate"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        @if (f['availableDate'].touched &&
+        f['availableDate'].hasError('required')) {
+        <mat-error>Available date is required</mat-error>
+        } @if (f['availableDate'].touched &&
+        f['availableDate'].hasError('datePast')) {
+        <mat-error>Date cannot be in the past</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="md:col-span-2 grid grid-cols-3 gap-6 items-end">
+      <div>
+        <mat-checkbox formControlName="hasAC"
+          >Has Air Conditioning</mat-checkbox
+        >
+      </div>
+
+      <div>
+        <mat-form-field appearance="fill" class="w-full">
+          <mat-label>Year Built</mat-label>
+          <input matInput type="number" formControlName="yearBuilt" />
+          @if (f['yearBuilt'].touched && f['yearBuilt'].hasError('required')) {
+          <mat-error>Year Built is required</mat-error>
+          } @else if (f['yearBuilt'].touched && f['yearBuilt'].hasError('min'))
+          {
+          <mat-error>Year must be ≥ 1900</mat-error>
+          } @else if (f['yearBuilt'].touched && f['yearBuilt'].hasError('max'))
+          {
+          <mat-error
+            >Year cannot exceed
+            {{ f["yearBuilt"].getError("max").max }}</mat-error
+          >
+          }
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-form-field appearance="fill" class="w-full">
+          <mat-label>Area (sqm)</mat-label>
+          <input matInput type="number" formControlName="areaSize" />
+          @if (f['areaSize'].touched && f['areaSize'].hasError('required')) {
+          <mat-error>Area is required</mat-error>
+          } @else if (f['areaSize'].touched && f['areaSize'].hasError('min')) {
+          <mat-error>Must be at least 1 sqm</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="photo">
+        Flat Photo (optional, max 1MB)
+      </label>
+      <input
+        id="photo"
+        type="file"
+        accept="image/*"
+        (change)="onFileSelected($event)"
+        class="block w-full"
+      />
+      @if (photoError) {
+      <p class="text-red-500 text-sm mt-1">{{ photoError }}</p>
+      } @if (photoDataUrl) {
+      <img
+        [src]="photoDataUrl"
+        alt="Preview"
+        class="mt-2 h-48 w-full object-cover rounded"
+      />
+      }
+    </div>
+
+    <div class="md:col-span-2 flex justify-center mt-4">
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="form.invalid || photoError"
+        type="submit"
+      >
+        Add New Flat
+      </button>
+    </div>
+  </form>
+</div>

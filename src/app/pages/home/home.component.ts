@@ -3,39 +3,46 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
+import { MatCardModule } from '@angular/material/card';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { FlatService, Flat } from '../../services/flat.service';
 import { AuthService, UserProfile } from '../../services/auth.service';
+import { FavoriteService } from '../../services/favorite.service';
+
+import { filter, switchMap } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-home',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    MatCardModule,
+    MatMenuModule,
+    MatButtonModule,
+    MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
     MatSliderModule,
-    MatTableModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
   private fb = inject(FormBuilder);
   private flatService = inject(FlatService);
+  private favService = inject(FavoriteService);
   private auth = inject(AuthService);
   private router = inject(Router);
 
@@ -46,8 +53,10 @@ export class HomeComponent {
 
   filterForm: FormGroup = this.fb.group({
     city: [''],
-    price: [[this.minPrice, this.maxPrice]],
-    area: [[this.minArea, this.maxArea]],
+    priceStart: [this.minPrice],
+    priceEnd: [this.maxPrice],
+    areaStart: [this.minArea],
+    areaEnd: [this.maxArea],
     sortBy: ['city'],
   });
 
@@ -60,32 +69,36 @@ export class HomeComponent {
 
   flatsSignal: Signal<(Flat & { id: string })[]> = computed(() => {
     const flats = this.allFlatsSignal() ?? [];
-    const { city, price, area, sortBy } = this.filterForm.value;
+    const { city, priceStart, priceEnd, areaStart, areaEnd, sortBy } =
+      this.filterForm.value;
 
-    const filtered = flats.filter(
+    const normalized = flats.map((f) => ({
+      ...f,
+      availableDate:
+        f.availableDate instanceof Date
+          ? f.availableDate
+          : (f.availableDate as any)?.toDate?.() ?? new Date(0),
+    }));
+
+    const filtered = normalized.filter(
       (f) =>
         (!city || f.city === city) &&
-        f.rentPrice >= price[0] &&
-        f.rentPrice <= price[1] &&
-        f.areaSize >= area[0] &&
-        f.areaSize <= area[1]
+        f.rentPrice >= priceStart &&
+        f.rentPrice <= priceEnd &&
+        f.areaSize >= areaStart &&
+        f.areaSize <= areaEnd
     );
 
     return filtered.sort((a, b) => {
-      const aVal = a[sortBy as keyof Flat]!;
-      const bVal = b[sortBy as keyof Flat]!;
-
-      if (aVal < bVal) return -1;
-      if (aVal > bVal) return 1;
-      return 0;
+      const aVal = a[sortBy as keyof Flat]!,
+        bVal = b[sortBy as keyof Flat]!;
+      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
     });
   });
 
-  userSignal: Signal<UserProfile | null> = toSignal(this.auth.currentUser$, {
-    initialValue: null,
+  favoritesSignal: Signal<string[]> = toSignal(this.favService.favorites$, {
+    initialValue: [],
   });
-
-  displayColumns = ['city', 'rentPrice', 'areaSize', 'owner', 'actions'];
 
   get cityOptions(): string[] {
     return Array.from(
@@ -93,16 +106,38 @@ export class HomeComponent {
     ).sort();
   }
 
+  viewNewFlat() {
+    this.router.navigate(['/flats/new']);
+  }
+
   viewFlat(id: string) {
     this.router.navigate(['/flats', id]);
   }
 
-  toggleFavorite(id: string) {
-    // TODO: integrate FavoriteService
+  setSort(key: keyof Flat) {
+    this.filterForm.patchValue({ sortBy: key });
   }
 
-  isFavorite(id: string): boolean {
-    // TODO: integrate FavoriteService
-    return false;
+  resetFilters() {
+    this.filterForm.patchValue({
+      city: '',
+      priceStart: this.minPrice,
+      priceEnd: this.maxPrice,
+      areaStart: this.minArea,
+      areaEnd: this.maxArea,
+    });
+  }
+
+  async toggleFavorite(flatId: string) {
+    const favs = this.favoritesSignal();
+    if (favs.includes(flatId)) {
+      await this.favService.removeFavorite(flatId);
+    } else {
+      await this.favService.addFavorite(flatId);
+    }
+  }
+
+  isFavorite(flatId: string): boolean {
+    return this.favoritesSignal().includes(flatId);
   }
 }

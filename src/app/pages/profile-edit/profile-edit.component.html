@@ -3,6 +3,11 @@
   <h2 class="text-2xl font-semibold mb-6">Edit Profile</h2>
   <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
     <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
       <mat-label>First Name</mat-label>
       <input matInput formControlName="firstName" />
       @if (f.firstName.touched && f.firstName.hasError('required')) {

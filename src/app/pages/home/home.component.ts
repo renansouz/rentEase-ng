@@ -12,19 +12,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatInputModule } from '@angular/material/input';
 
 import { FlatService, Flat } from '../../services/flat.service';
-import { AuthService, UserProfile } from '../../services/auth.service';
 import { FavoriteService } from '../../services/favorite.service';
 
-import { filter, switchMap } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
     CommonModule,
+    MatInputModule,
     ReactiveFormsModule,
     MatCardModule,
     MatMenuModule,
@@ -43,8 +44,9 @@ export class HomeComponent {
   private fb = inject(FormBuilder);
   private flatService = inject(FlatService);
   private favService = inject(FavoriteService);
-  private auth = inject(AuthService);
   private router = inject(Router);
+
+  showFilters = false;
 
   minPrice = 0;
   maxPrice = 5000;
@@ -60,6 +62,14 @@ export class HomeComponent {
     sortBy: ['city'],
   });
 
+  private filterValue$ = this.filterForm.valueChanges.pipe(
+    startWith(this.filterForm.value)
+  );
+
+  filterSignal = toSignal(this.filterValue$, {
+    initialValue: this.filterForm.value,
+  });
+
   private allFlatsSignal: Signal<(Flat & { id: string })[] | null> = toSignal(
     this.flatService.getAllFlats(),
     { initialValue: null }
@@ -70,7 +80,7 @@ export class HomeComponent {
   flatsSignal: Signal<(Flat & { id: string })[]> = computed(() => {
     const flats = this.allFlatsSignal() ?? [];
     const { city, priceStart, priceEnd, areaStart, areaEnd, sortBy } =
-      this.filterForm.value;
+      this.filterSignal();
 
     const normalized = flats.map((f) => ({
       ...f,
@@ -139,5 +149,9 @@ export class HomeComponent {
 
   isFavorite(flatId: string): boolean {
     return this.favoritesSignal().includes(flatId);
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 }

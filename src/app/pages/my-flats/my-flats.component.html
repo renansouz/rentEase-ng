@@ -14,7 +14,7 @@
     <p class="text-gray-600">You haven't added any flats yet.</p>
     } @else { @for (flat of flatsSignal(); track flat.id) {
     <mat-card class="relative w-96 flex-shrink-0">
-      <div class="relative h-40 w-full overflow-hidden">
+      <div class="relative h-40 w-full overflow-hidden rounded-t-xl">
         <img
           mat-card-image
           [src]="flat.photoUrl || 'fallback.png'"

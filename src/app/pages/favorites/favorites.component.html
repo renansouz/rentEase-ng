@@ -1,1 +1,56 @@
-<p>favorites works!</p>
+<div class="p-4">
+  @if (loading()) {
+  <div class="flex justify-center py-8 w-full">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+  } @else {
+  <h1 class="text-2xl font-semibold mb-6 text-center">My Favorites</h1>
+  <div class="flex flex-wrap gap-6 justify-center">
+    @if (favoriteFlatsSignal().length === 0) {
+    <p class="text-gray-600">You have no favorite flats yet.</p>
+    } @else { @for (flat of favoriteFlatsSignal(); track flat.id) {
+    <mat-card class="relative w-96 flex-shrink-0">
+      <img
+        mat-card-image
+        [src]="flat.photoUrl || 'fallback.png'"
+        alt="Flat photo"
+        class="max-h-40 min-h-40 w-full object-cover"
+      />
+
+      <button
+        mat-icon-button
+        class="!absolute !top-2 !right-2 !text-red-500 !bg-gray-50/70"
+        (click)="removeFavorite(flat.id)"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+
+      <mat-card-content class="space-y-1">
+        <div class="flex justify-between pt-3">
+          <h3 class="text-lg font-medium">
+            {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
+          </h3>
+          <p class="text-gray-700">{{ flat.rentPrice | currency }}</p>
+        </div>
+        <p class="text-gray-600">
+          {{ flat.areaSize }} sqm · Built {{ flat.yearBuilt }}
+        </p>
+        <p class="text-gray-500">
+          Available: {{ flat.availableDate | date : "mediumDate" }}
+        </p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-button
+          (click)="viewFlat(flat.id)"
+          class="!bg-blue-500 !w-full !rounded-md !px-8 !text-white"
+        >
+          View
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    } }
+  </div>
+  }
+</div>

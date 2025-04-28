@@ -2,9 +2,12 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+
+import { Timestamp } from 'firebase/firestore';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../services/auth.service';
 
@@ -29,21 +32,32 @@ export class ProfileEditComponent {
   loading$ = this.auth.loading$;
 
   form = this.fb.group({
+    email: [{ value: '', disabled: true }],
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     birthDate: ['', Validators.required],
   });
 
   constructor() {
-    this.userSignal();
     this.auth.currentUser$.subscribe((profile) => {
-      if (profile) {
-        this.form.patchValue({
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          birthDate: profile.birthDate.toISOString().substring(0, 10),
-        });
-      }
+      if (!profile) return;
+      const raw = profile.birthDate;
+      const date =
+        raw instanceof Timestamp
+          ? raw.toDate()
+          : raw instanceof Date
+          ? raw
+          : new Date(raw);
+      const iso = isNaN(date.getTime())
+        ? ''
+        : date.toISOString().substring(0, 10);
+
+      this.form.patchValue({
+        email: profile.email,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        birthDate: iso,
+      });
     });
   }
 

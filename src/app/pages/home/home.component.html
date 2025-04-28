@@ -11,9 +11,10 @@
         <mat-icon>add</mat-icon>
         Add New Flat
       </button>
-
-      <button mat-icon-button [matMenuTriggerFor]="sortMenu" aria-label="Sort">
+      <button mat-flat-button color="primary" [matMenuTriggerFor]="sortMenu">
         <mat-icon>sort</mat-icon>
+        Sort by: {{ filterSignal().sortBy | titlecase }}
+        <mat-icon>arrow_drop_down</mat-icon>
       </button>
       <mat-menu #sortMenu="matMenu">
         <button mat-menu-item (click)="setSort('city')">City (A-Z)</button>
@@ -25,60 +26,56 @@
         </button>
       </mat-menu>
 
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="filterMenu"
-        aria-label="Filter"
-      >
+      <button mat-flat-button color="accent" (click)="toggleFilters()">
         <mat-icon>filter_list</mat-icon>
+        Filters
+        <mat-icon>
+          {{ showFilters ? "arrow_drop_up" : "arrow_drop_down" }}
+        </mat-icon>
       </button>
-      <mat-menu #filterMenu="matMenu" class="px-4 py-2">
-        <form [formGroup]="filterForm" class="space-y-4 w-64">
-          <mat-form-field appearance="fill" class="w-full">
-            <mat-label>City</mat-label>
-            <mat-select formControlName="city">
-              <mat-option value="">All</mat-option>
-              @for (c of cityOptions; track c) {
-              <mat-option [value]="c">{{ c }}</mat-option>
-              } @empty { }
-            </mat-select>
-          </mat-form-field>
-
-          <div class="w-full">
-            <label class="block text-sm font-medium mb-1">Price Range</label>
-            <mat-slider
-              [min]="minPrice"
-              [max]="maxPrice"
-              [step]="50"
-              thumbLabel
-              tickInterval="auto"
-            >
-              <input matSliderStartThumb formControlName="priceStart" />
-              <input matSliderEndThumb formControlName="priceEnd" />
-            </mat-slider>
-          </div>
-
-          <div class="w-full">
-            <label class="block text-sm font-medium mb-1">Area (sqm)</label>
-            <mat-slider
-              [min]="minArea"
-              [max]="maxArea"
-              [step]="5"
-              thumbLabel
-              tickInterval="auto"
-            >
-              <input matSliderStartThumb formControlName="areaStart" />
-              <input matSliderEndThumb formControlName="areaEnd" />
-            </mat-slider>
-          </div>
-
-          <div class="flex justify-end">
-            <button mat-button (click)="resetFilters()">Reset</button>
-          </div>
-        </form>
-      </mat-menu>
     </div>
   </div>
+
+  @if(showFilters){
+  <form
+    [formGroup]="filterForm"
+    class="mb-6 p-4 bg-white rounded shadow grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+  >
+    <mat-form-field appearance="fill">
+      <mat-label>City</mat-label>
+      <mat-select formControlName="city">
+        <mat-option value="">All</mat-option>
+        @for (c of cityOptions; track c) {
+        <mat-option [value]="c">{{ c }}</mat-option>
+        } @empty {
+        <mat-option disabled>No cities</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Min Price</mat-label>
+      <input matInput type="number" formControlName="priceStart" />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Max Price</mat-label>
+      <input matInput type="number" formControlName="priceEnd" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Min Area (sqm)</mat-label>
+      <input matInput type="number" formControlName="areaStart" />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Max Area (sqm)</mat-label>
+      <input matInput type="number" formControlName="areaEnd" />
+    </mat-form-field>
+
+    <div class="col-span-full flex justify-end">
+      <button mat-button (click)="resetFilters()">Reset All</button>
+    </div>
+  </form>
+  }
 
   <div class="flex flex-wrap gap-6 justify-center">
     @if (flatsSignal().length === 0) {
@@ -89,7 +86,7 @@
         mat-card-image
         [src]="flat.photoUrl || 'fallback.png'"
         alt="Flat photo"
-        class="max-h-40 object-cover"
+        class="max-h-40 min-h-40 object-cover"
       />
 
       <button

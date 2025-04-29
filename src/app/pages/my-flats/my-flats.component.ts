@@ -65,4 +65,8 @@ export class MyFlatsComponent {
       date
     );
   }
+
+  addNewFlat() {
+    this.router.navigate(['/flats/new']);
+  }
 }

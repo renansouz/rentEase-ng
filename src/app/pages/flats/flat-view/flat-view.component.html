@@ -1,1 +1,86 @@
-<p>flat-view works!</p>
+<div class="p-4 max-w-3xl mx-auto">
+  @if(!flatSignal()) {
+  <div class="flex justify-center py-16">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+  } @else {
+  <mat-card class="space-y-4 p-10">
+    @if(flatSignal()!.photoUrl) {
+    <img
+      [src]="flatSignal()!.photoUrl"
+      alt="Flat photo"
+      class="w-full h-64 object-cover rounded"
+    />
+    }
+
+    <h2 class="text-2xl font-semibold">
+      {{ flatSignal()!.streetNumber }}, {{ flatSignal()!.streetName }},
+      {{ flatSignal()!.city }}
+    </h2>
+    <p class="text-gray-700 text-lg">
+      Rent: {{ flatSignal()!.rentPrice | currency }}
+    </p>
+
+    <div class="grid grid-cols-2 gap-4 text-gray-600">
+      <div>Area: {{ flatSignal()!.areaSize }} sqm</div>
+      <div>Built: {{ flatSignal()!.yearBuilt }}</div>
+      <div>AC: {{ flatSignal()!.hasAC ? "Yes" : "No" }}</div>
+      <div>Available: {{ formatDate(flatSignal()!.availableDate) }}</div>
+    </div>
+
+    <p class="text-gray-500">
+      Owner:
+      <button mat-button (click)="viewOwnerProfile()">
+        {{ ownerName() || flatSignal()!.ownerUID }}
+      </button>
+    </p>
+
+    <mat-divider></mat-divider>
+
+    @if (isOwner()) {
+    <button mat-flat-button color="primary" (click)="edit()">
+      <mat-icon>edit</mat-icon> Edit Flat
+    </button>
+
+    <h3 class="mt-6 text-xl font-semibold">Messages</h3>
+    @if (messagesSignal().length === 0) {
+    <p class="text-gray-600">No messages yet.</p>
+    } @else {
+    <mat-list>
+      @for (msg of messagesSignal(); track msg.id) {
+      <mat-list-item class="flex flex-col items-start space-y-1">
+        <div class="w-full flex justify-between">
+          <span class="font-medium">
+            {{ msg.senderName }} ({{ msg.senderEmail }})
+          </span>
+          <span class="text-sm text-gray-500">
+            {{ formatDate(msg.createdAt) }}
+          </span>
+        </div>
+        <p class="pl-2">{{ msg.content }}</p>
+      </mat-list-item>
+      }
+    </mat-list>
+    } } @else { @if (sent) {
+    <div class="text-center text-green-600 py-4">
+      Your message has been sent! Please wait for a reply.
+    </div>
+    } @else {
+    <form [formGroup]="msgForm" (ngSubmit)="sendMessage()" class="space-y-2">
+      <mat-form-field class="w-full">
+        <mat-label>Your message</mat-label>
+        <textarea matInput formControlName="content" rows="3"></textarea>
+      </mat-form-field>
+      <button
+        mat-flat-button
+        color="accent"
+        class="disabled:cursor-not-allowed"
+        [disabled]="sent || msgForm.invalid"
+      >
+        <mat-icon>send</mat-icon> Send
+      </button>
+    </form>
+    } }
+  </mat-card>
+  }
+</div>

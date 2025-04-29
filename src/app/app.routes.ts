@@ -16,6 +16,7 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileEditComponent } from './pages/profile-edit/profile-edit.component';
 import { AllUsersComponent } from './pages/users/all-users/all-users.component';
 import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.component';
+import { PublicProfileComponent } from './pages/public-profile/public-profile.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
@@ -62,7 +63,11 @@ export const routes: Routes = [
   {
     path: 'profile/edit',
     component: ProfileEditComponent,
-
+    canActivate: [authGuard],
+  },
+  {
+    path: 'users/:id',
+    component: PublicProfileComponent,
     canActivate: [authGuard],
   },
 

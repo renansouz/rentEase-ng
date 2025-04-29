@@ -10,10 +10,14 @@ import {
   doc,
   deleteDoc,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
+import { Observable, firstValueFrom } from 'rxjs';
 
 export interface Message {
+  id?: string;
   senderUID: string;
+  senderName: string;
+  senderEmail: string;
   content: string;
   createdAt?: Date;
 }
@@ -21,29 +25,30 @@ export interface Message {
 @Injectable({ providedIn: 'root' })
 export class MessageService {
   private firestore = inject(Firestore);
+  private auth = inject(AuthService);
 
-  async sendMessage(
-    flatId: string,
-    message: Omit<Message, 'createdAt'>
-  ): Promise<string> {
+  async sendMessage(flatId: string, content: string): Promise<string> {
+    const user = await firstValueFrom(this.auth.currentUser$);
+    if (!user) throw new Error('Not authenticated');
     const messagesCol = collection(this.firestore, 'flats', flatId, 'messages');
     const docRef = await addDoc(messagesCol, {
-      ...message,
+      senderUID: user.uid,
+      senderName: `${user.firstName} ${user.lastName}`,
+      senderEmail: user.email,
+      content,
       createdAt: serverTimestamp(),
     });
     return docRef.id;
   }
 
-  getMessages(flatId: string): Observable<Array<Message & { id: string }>> {
+  getMessages(flatId: string): Observable<Message[]> {
     const messagesCol = collection(this.firestore, 'flats', flatId, 'messages');
     const q = query(messagesCol, orderBy('createdAt', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<
-      Array<Message & { id: string }>
-    >;
+    return collectionData(q, { idField: 'id' }) as Observable<Message[]>;
   }
 
-  async deleteMessage(flatId: string, messageId: string): Promise<void> {
-    const docRef = doc(this.firestore, 'flats', flatId, 'messages', messageId);
+  async deleteMessage(flatId: string, msgId: string) {
+    const docRef = doc(this.firestore, 'flats', flatId, 'messages', msgId);
     await deleteDoc(docRef);
   }
 }

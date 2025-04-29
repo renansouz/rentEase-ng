@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { FlatService, Flat } from '../../services/flat.service';
 import { FavoriteService } from '../../services/favorite.service';
 
+import { AuthService, UserProfile } from '../../services/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
@@ -42,9 +43,14 @@ import { startWith } from 'rxjs';
 })
 export class HomeComponent {
   private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
   private flatService = inject(FlatService);
   private favService = inject(FavoriteService);
   private router = inject(Router);
+
+  userSignal = toSignal<UserProfile | null>(this.auth.currentUser$, {
+    initialValue: null,
+  });
 
   showFilters = false;
 
@@ -79,6 +85,7 @@ export class HomeComponent {
 
   flatsSignal: Signal<(Flat & { id: string })[]> = computed(() => {
     const flats = this.allFlatsSignal() ?? [];
+    const user = this.userSignal();
     const { city, priceStart, priceEnd, areaStart, areaEnd, sortBy } =
       this.filterSignal();
 
@@ -90,7 +97,11 @@ export class HomeComponent {
           : (f.availableDate as any)?.toDate?.() ?? new Date(0),
     }));
 
-    const filtered = normalized.filter(
+    const others = normalized.filter((f) =>
+      user ? f.ownerUID !== user.uid : true
+    );
+
+    const filtered = others.filter(
       (f) =>
         (!city || f.city === city) &&
         f.rentPrice >= priceStart &&
@@ -100,8 +111,8 @@ export class HomeComponent {
     );
 
     return filtered.sort((a, b) => {
-      const aVal = a[sortBy as keyof Flat]!,
-        bVal = b[sortBy as keyof Flat]!;
+      const aVal = a[sortBy as keyof Flat]!;
+      const bVal = b[sortBy as keyof Flat]!;
       return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
     });
   });

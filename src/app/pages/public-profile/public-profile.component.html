@@ -1,0 +1,26 @@
+@if(user()) {
+<mat-card class="relative max-w-md mx-auto mt-12 p-10 pt-20">
+  <button
+    mat-icon-button
+    class="absolute top-4 left-4 bg-gray-300 p-2 flex rounded-full cursor-pointer"
+    aria-label="Go back"
+    (click)="goBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <h2 class="text-2xl font-semibold mb-4">
+    {{ user()!.firstName }} {{ user()!.lastName }}
+  </h2>
+
+  <p><strong>Email:</strong> {{ user()!.email }}</p>
+  <p>
+    <strong>Joined:</strong>
+    {{ formattedCreatedAt }}
+  </p>
+</mat-card>
+} @else {
+<div class="flex justify-center py-12">
+  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+</div>
+}

@@ -91,6 +91,11 @@
     >
       Register
     </button>
+    @if(submitError){
+    <p class="mt-2 text-red-600 text-center">
+      {{ submitError }}
+    </p>
+    }
 
     <p class="text-center text-sm text-gray-600">
       Already have an account?

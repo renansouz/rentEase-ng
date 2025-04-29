@@ -53,6 +53,7 @@ function confirmPasswordValidator(
 export class RegisterComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  submitError: string | null = null;
 
   hidePassword = true;
   loading$ = this.auth.loading$;
@@ -82,14 +83,25 @@ export class RegisterComponent {
 
   async onSubmit() {
     if (this.form.invalid) return;
+    this.submitError = null;
+
     const { firstName, lastName, email, birthDate, password } = this.form
       .value as any;
-    await this.auth.register(
-      email,
-      password,
-      firstName,
-      lastName,
-      new Date(birthDate)
-    );
+
+    try {
+      await this.auth.register(
+        email,
+        password,
+        firstName,
+        lastName,
+        new Date(birthDate)
+      );
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') {
+        this.submitError = 'This email is already registered.';
+      } else {
+        this.submitError = 'Registration failed. Please try again.';
+      }
+    }
   }
 }

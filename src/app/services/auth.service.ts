@@ -53,22 +53,25 @@ export class AuthService {
     birthDate: Date
   ): Promise<void> {
     this.loadingSubject.next(true);
+    let cred;
     try {
-      const cred = await createUserWithEmailAndPassword(
-        this.auth,
-        email,
-        password
-      );
+      cred = await createUserWithEmailAndPassword(this.auth, email, password);
       const uid = cred.user.uid;
 
-      await setDoc(doc(this.firestore, 'users', uid), {
-        email,
-        firstName,
-        lastName,
-        birthDate,
-        isAdmin: false,
-        createdAt: new Date(),
-      });
+      try {
+        await setDoc(doc(this.firestore, 'users', uid), {
+          email,
+          firstName,
+          lastName,
+          birthDate,
+          isAdmin: false,
+          createdAt: new Date(),
+        });
+      } catch (profileError) {
+        await cred.user.delete();
+        throw profileError;
+      }
+
       await this.router.navigate(['/']);
     } finally {
       this.loadingSubject.next(false);

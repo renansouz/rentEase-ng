@@ -1,1 +1,126 @@
-<p>all-users works!</p>
+<form
+  [formGroup]="filterForm"
+  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 bg-white rounded shadow mb-6"
+>
+  <mat-form-field appearance="fill">
+    <mat-label>User Type</mat-label>
+    <mat-select formControlName="userType">
+      <mat-option value="all">All</mat-option>
+      <mat-option value="user">User</mat-option>
+      <mat-option value="admin">Admin</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Min Age</mat-label>
+    <input matInput type="number" formControlName="minAge" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Max Age</mat-label>
+    <input matInput type="number" formControlName="maxAge" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Min Flats</mat-label>
+    <input matInput type="number" formControlName="minFlats" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Max Flats</mat-label>
+    <input matInput type="number" formControlName="maxFlats" />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Only Admin?</mat-label>
+    <mat-select formControlName="onlyAdmins">
+      <mat-option [value]="null">All</mat-option>
+      <mat-option [value]="true">Yes</mat-option>
+      <mat-option [value]="false">No</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Sort By</mat-label>
+    <mat-select formControlName="sortBy">
+      <mat-option value="firstName">First Name</mat-option>
+      <mat-option value="lastName">Last Name</mat-option>
+      <mat-option value="flatsCount">Flats Count</mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
+<table mat-table [dataSource]="displayedUsers()">
+  <ng-container matColumnDef="firstName">
+    <th mat-header-cell *matHeaderCellDef>First Name</th>
+    <td mat-cell *matCellDef="let u">
+      {{ u.firstName }}
+      <span *ngIf="u.isYou" class="text-sm text-blue-600">(you)</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="lastName">
+    <th mat-header-cell *matHeaderCellDef>Last Name</th>
+    <td mat-cell *matCellDef="let u">{{ u.lastName }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="age">
+    <th mat-header-cell *matHeaderCellDef>Age</th>
+    <td mat-cell *matCellDef="let u">{{ u.age }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="flatsCount">
+    <th mat-header-cell *matHeaderCellDef>Flats</th>
+    <td mat-cell *matCellDef="let u">{{ u.flatsCount }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="isAdmin">
+    <th mat-header-cell *matHeaderCellDef>Admin?</th>
+    <td mat-cell *matCellDef="let u">{{ u.isAdmin ? "Yes" : "No" }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="profile">
+    <th mat-header-cell *matHeaderCellDef>Profile</th>
+    <td mat-cell *matCellDef="let u">
+      <button mat-button (click)="viewUserProfile(u.uid)">View</button>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let u">
+      <button mat-button (click)="grantAdmin(u)" *ngIf="!u.isAdmin">
+        Make Admin
+      </button>
+      <button mat-button color="warn" (click)="removeUser(u)">Delete</button>
+    </td>
+  </ng-container>
+
+  <tr
+    mat-header-row
+    *matHeaderRowDef="[
+      'firstName',
+      'lastName',
+      'age',
+      'flatsCount',
+      'isAdmin',
+      'profile',
+      'actions'
+    ]"
+  ></tr>
+  <tr
+    mat-row
+    *matRowDef="
+      let row;
+      columns: [
+        'firstName',
+        'lastName',
+        'age',
+        'flatsCount',
+        'isAdmin',
+        'profile',
+        'actions'
+      ]
+    "
+  ></tr>
+</table>

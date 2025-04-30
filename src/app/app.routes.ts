@@ -5,6 +5,7 @@ import { adminGuard } from './guards/admin.guard';
 import { guestGuard } from './guards/guest.guard';
 
 import { LoginComponent } from './pages/login/login.component';
+import { BoardingComponent } from './pages/boarding/boarding.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { HomeComponent } from './pages/home/home.component';
 import { NewFlatComponent } from './pages/flats/new-flat/new-flat.component';
@@ -21,6 +22,7 @@ import { PublicProfileComponent } from './pages/public-profile/public-profile.co
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
+  { path: 'boarding', component: BoardingComponent, canActivate: [guestGuard] },
 
   {
     path: '',

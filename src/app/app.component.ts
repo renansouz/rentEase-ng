@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
@@ -6,7 +6,8 @@ import { HeaderComponent } from './components/header/header.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { first } from 'rxjs';
-import { AuthService } from './services/auth.service';
+import { AuthService, UserProfile } from './services/auth.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,10 @@ import { AuthService } from './services/auth.service';
 })
 export class AppComponent {
   private auth = inject(AuthService);
+
+  user: Signal<UserProfile | null> = toSignal(this.auth.currentUser$, {
+    initialValue: null,
+  });
 
   initialized = false;
 

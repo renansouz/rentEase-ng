@@ -1,6 +1,16 @@
-<div class="max-w-sm mx-auto mt-16 p-6 bg-white rounded-lg shadow">
-  <h2 class="text-2xl font-semibold mb-6">Sign In</h2>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+<div class="max-w-lg mx-auto mt-16 p-6 bg-white rounded-lg shadow">
+  <h2 class="text-2xl font-semibold mb-1">Welcome! Log in below.</h2>
+  <p class="text-sm mb-6">
+    Don't have an account?
+    <a routerLink="/register" class="text-red-600 font-bold hover:underline">
+      Sign up here.
+    </a>
+  </p>
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="space-y-4 flex flex-col items-center"
+  >
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Email</mat-label>
       <input matInput type="email" formControlName="email" />
@@ -39,19 +49,11 @@
     }
 
     <button
-      mat-raised-button
-      class="w-full py-3 !bg-blue-500 !text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-25 py-1 rounded-lg bg-red-600 !text-white disabled:opacity-50 disabled:bg-gray-600"
       type="submit"
       [disabled]="form.invalid || (loading$ | async)"
     >
       Login
     </button>
-
-    <p class="text-center text-sm text-gray-600">
-      Don't have an account?
-      <a routerLink="/register" class="text-blue-500 hover:underline">
-        Register
-      </a>
-    </p>
   </form>
 </div>

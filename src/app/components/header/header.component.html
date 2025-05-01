@@ -1,5 +1,9 @@
 <header
-  class="bg-gray-900 text-white shadow p-4 flex items-center justify-between"
+  [class]="
+    user()
+      ? 'bg-gray-900 text-white shadow p-4 flex items-center justify-between'
+      : 'max-h-[76px] bg-gray-50'
+  "
 >
   @if (user()) {
   <div class="flex items-center space-x-4">
@@ -72,8 +76,7 @@
   </div>
   } @else {
   <a routerLink="/" class="flex items-center">
-    <img src="rentease-logo.png" alt="Ren Ease" class="h-11" />
+    <img src="rentease-logo-red.png" alt="RentEase" class="h-28 -mt-5" />
   </a>
-
   }
 </header>

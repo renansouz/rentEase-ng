@@ -6,14 +6,45 @@
   } @else {
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-semibold">Flats</h1>
+
+    <div class="relative mx-4 flex-1 max-w-md">
+      <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+        >search</mat-icon
+      >
+      <input
+        type="text"
+        class="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder="Search by city or landlord"
+        [(ngModel)]="searchTerm"
+      />
+      @if(searchTerm) {
+      <button
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+        (click)="searchTerm = ''"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      }
+    </div>
+
     <div class="flex items-center space-x-2">
-      <button mat-flat-button color="primary" (click)="viewNewFlat()">
+      <button
+        class="!bg-red-600 !rounded-lg !text-white !font-bold"
+        mat-button
+        color="primary"
+        (click)="viewNewFlat()"
+      >
         <mat-icon>add</mat-icon>
         Add New Flat
       </button>
-      <button mat-flat-button color="primary" [matMenuTriggerFor]="sortMenu">
+      <button
+        class="!bg-gray-300 !rounded-lg !border !border-gray-800 !text-gray-800"
+        mat-button
+        color="primary"
+        [matMenuTriggerFor]="sortMenu"
+      >
         <mat-icon>sort</mat-icon>
-        Sort by: {{ filterSignal().sortBy | titlecase }}
+        Sort by
         <mat-icon>arrow_drop_down</mat-icon>
       </button>
       <mat-menu #sortMenu="matMenu">
@@ -26,10 +57,14 @@
         </button>
       </mat-menu>
 
-      <button mat-flat-button color="accent" (click)="toggleFilters()">
+      <button
+        class="!text-gray-800 !font-bold"
+        mat-button
+        color="accent"
+        (click)="toggleFilters()"
+      >
         <mat-icon>filter_list</mat-icon>
-        Filters
-        <mat-icon>
+        <mat-icon class="!m-0">
           {{ showFilters ? "arrow_drop_up" : "arrow_drop_down" }}
         </mat-icon>
       </button>
@@ -101,6 +136,9 @@
       </button>
 
       <mat-card-content class="space-y-1">
+        <p class="text-sm text-gray-700">
+          Landlord: <strong>{{ flat.ownerName }}</strong>
+        </p>
         <div class="flex justify-between pt-3">
           <h3 class="text-lg font-medium">
             {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
@@ -119,7 +157,7 @@
         <button
           mat-button
           (click)="viewFlat(flat.id)"
-          class="!bg-blue-500 !w-full !rounded-md !px-8 !text-white"
+          class="!bg-red-500 !w-full !rounded-md !px-8 !text-white"
         >
           View
         </button>

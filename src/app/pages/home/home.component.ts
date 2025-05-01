@@ -2,6 +2,7 @@ import { Component, Signal, computed, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
@@ -25,6 +26,7 @@ import { startWith } from 'rxjs';
   selector: 'app-home',
   standalone: true,
   imports: [
+    FormsModule,
     CommonModule,
     MatInputModule,
     ReactiveFormsModule,
@@ -48,9 +50,13 @@ export class HomeComponent {
   private favService = inject(FavoriteService);
   private router = inject(Router);
 
-  userSignal = toSignal<UserProfile | null>(this.auth.currentUser$, {
-    initialValue: null,
-  });
+  searchTerm: string = '';
+
+  userSignal = toSignal(this.auth.currentUser$, { initialValue: null });
+  usersMapSignal: Signal<Record<string, UserProfile>> = toSignal(
+    this.auth.usersMap$,
+    { initialValue: {} }
+  );
 
   showFilters = false;
 
@@ -83,39 +89,50 @@ export class HomeComponent {
 
   loading: Signal<boolean> = computed(() => this.allFlatsSignal() === null);
 
-  flatsSignal: Signal<(Flat & { id: string })[]> = computed(() => {
-    const flats = this.allFlatsSignal() ?? [];
-    const user = this.userSignal();
-    const { city, priceStart, priceEnd, areaStart, areaEnd, sortBy } =
-      this.filterSignal();
+  flatsSignal: Signal<Array<Flat & { id: string; ownerName: string }>> =
+    computed(() => {
+      const flats = this.allFlatsSignal() ?? [];
+      const usersMap = this.usersMapSignal();
+      const { city, priceStart, priceEnd, areaStart, areaEnd, sortBy } =
+        this.filterSignal();
+      const term = this.searchTerm.trim().toLowerCase();
 
-    const normalized = flats.map((f) => ({
-      ...f,
-      availableDate:
-        f.availableDate instanceof Date
-          ? f.availableDate
-          : (f.availableDate as any)?.toDate?.() ?? new Date(0),
-    }));
+      const enriched = flats.map((f) => {
+        const owner = usersMap[f.ownerUID];
+        const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : '…';
+        return {
+          ...f,
+          availableDate:
+            f.availableDate instanceof Date
+              ? f.availableDate
+              : (f.availableDate as any)?.toDate?.() ?? new Date(0),
+          ownerName,
+        };
+      });
 
-    const others = normalized.filter((f) =>
-      user ? f.ownerUID !== user.uid : true
-    );
+      let filtered = enriched.filter(
+        (f) =>
+          (!city || f.city === city) &&
+          f.rentPrice >= priceStart &&
+          f.rentPrice <= priceEnd &&
+          f.areaSize >= areaStart &&
+          f.areaSize <= areaEnd
+      );
 
-    const filtered = others.filter(
-      (f) =>
-        (!city || f.city === city) &&
-        f.rentPrice >= priceStart &&
-        f.rentPrice <= priceEnd &&
-        f.areaSize >= areaStart &&
-        f.areaSize <= areaEnd
-    );
+      if (term) {
+        filtered = filtered.filter(
+          (f) =>
+            f.city.toLowerCase().includes(term) ||
+            f.ownerName.toLowerCase().includes(term)
+        );
+      }
 
-    return filtered.sort((a, b) => {
-      const aVal = a[sortBy as keyof Flat]!;
-      const bVal = b[sortBy as keyof Flat]!;
-      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return filtered.sort((a, b) => {
+        const aVal = a[sortBy as keyof Flat]!;
+        const bVal = b[sortBy as keyof Flat]!;
+        return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      });
     });
-  });
 
   favoritesSignal: Signal<string[]> = toSignal(this.favService.favorites$, {
     initialValue: [],

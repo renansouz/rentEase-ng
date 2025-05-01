@@ -1,11 +1,12 @@
 @if(!initialized) {
 <div>
-  <div class="h-screen flex items-center justify-center">
+  <div class="h-screen bg-gray-300 flex items-center justify-center">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
 </div>
-} @else {
+} @else { @if(showHeader() ) {
 <app-header></app-header>
+}
 <div class="bg-gray-300 py-4" style="min-height: calc(100dvh - 76px)">
   <router-outlet></router-outlet>
 </div>

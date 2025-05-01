@@ -19,7 +19,7 @@ import {
   docData,
 } from '@angular/fire/firestore';
 import { filter, map, switchMap, catchError } from 'rxjs/operators';
-import { Observable, combineLatest, of } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FlatService, Flat } from '../../../services/flat.service';

@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "rentease-5a03e"
-  }
+    "default": "rentease-5a03e",
+    "productino": "rentease-5a03e",
+    "production": "rentease-5a03e"
+  },
+  "targets": {},
+  "etags": {}
 }

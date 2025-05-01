@@ -14,9 +14,12 @@ import {
   setDoc,
   deleteDoc,
   updateDoc,
+  collectionData,
+  collection,
+  CollectionReference,
 } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, switchMap } from 'rxjs';
 
 export interface UserProfile {
   uid: string;
@@ -127,5 +130,21 @@ export class AuthService {
     } finally {
       this.loadingSubject.next(false);
     }
+  }
+
+  get usersMap$(): Observable<Record<string, UserProfile>> {
+    const usersCol = collection(
+      this.firestore,
+      'users'
+    ) as CollectionReference<UserProfile>;
+
+    return collectionData(usersCol, { idField: 'uid' }).pipe(
+      map((users: UserProfile[]) =>
+        users.reduce((acc, u) => {
+          acc[u.uid] = u;
+          return acc;
+        }, {} as Record<string, UserProfile>)
+      )
+    );
   }
 }

@@ -1,19 +1,33 @@
 <div
   class="bg-gray-800 -my-4 h-full flex flex-col justify-center items-center relative z-0"
-  style="min-height: calc(100dvh - 64px)"
+  style="min-height: 100dvh"
 >
   <img
     src="Background_Complete.png"
     class="absolute h-full w-full object-cover z-[-1]"
   />
-  <img src="astro.png" class="absolute w-60" />
-  <h3 class="text-gray-50 font-sans font-bold text-4xl -mb-36">
+  <img
+    src="astro-background.png"
+    class="h-[100dvh] w-[100dvw] object-cover absolute"
+  />
+  <img
+    src="astro.png"
+    class="absolute w-48 mt-16"
+    [@shrinkOnLoad]="astroState"
+    alt="Lost astronaut"
+  />
+  <h3 class="text-gray-50 font-bold text-3xl -mb-28">
     Looks like you're lost in space
   </h3>
-  <p
-    class="text-gray-50 font-sans font-bold text-[450px]"
-    style="font-family: 'Montserrat', sans-serif"
-  >
-    404
+  <p class="text-gray-50 font-bold text-[350px]">404</p>
+  <p class="text-gray-50 font-bold -mt-28 mb-2">
+    Oops! We can't find this page.
   </p>
+
+  <a
+    routerLink="/"
+    class="bg-red-500 flex items-center z-10 cursor-pointer p-2 rounded-lg text-white font-medium"
+  >
+    <mat-icon>arrow_back</mat-icon> Back to homepage
+  </a>
 </div>

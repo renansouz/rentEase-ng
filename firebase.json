@@ -5,7 +5,7 @@
   },
   "hosting": {
     "site": "rentease-greystone",
-    "public": "dist/rent-ease",
+    "public": "dist/rent-ease/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

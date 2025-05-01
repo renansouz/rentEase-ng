@@ -18,7 +18,7 @@ cd rentEase-ng
 
 ### Firebase configuration
 
-1. In the ```src/``` folder, create a new file named ```app.config.ts```
+1. In the ```src/app/``` folder, create a new file named ```app.config.ts```
 
 2. Copy our Firebase SDK config object (the one shared in Teams) into it.
 

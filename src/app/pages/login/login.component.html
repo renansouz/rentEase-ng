@@ -1,8 +1,21 @@
-<div class="max-w-lg mx-auto mt-16 p-6 bg-white rounded-lg shadow">
+<div class="max-w-lg mx-auto mt-[2%] p-6 bg-white rounded-lg shadow">
   <h2 class="text-2xl font-semibold mb-1">Welcome! Log in below.</h2>
+  <button
+    class="w-full py-1 my-5 rounded-lg border border-gray-300 flex items-center justify-center space-x-2 hover:bg-gray-50 cursor-pointer"
+    type="button"
+    (click)="loginWithGoogle()"
+    [disabled]="loading$ | async"
+  >
+    <img
+      src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
+      class="w-7"
+    />
+    <label>Log in with Google</label>
+  </button>
+
   <p class="text-sm mb-6">
     Don't have an account?
-    <a routerLink="/register" class="text-red-600 font-bold hover:underline">
+    <a routerLink="/register" class="text-red-600 font-medium hover:underline">
       Sign up here.
     </a>
   </p>
@@ -46,6 +59,19 @@
 
     @if (errorMessage) {
     <div class="text-red-500 text-sm">{{ errorMessage }}</div>
+    }
+
+    <div
+      class="w-full text-right text-sm -mt-4 font-medium text-blue-700 hover:underline cursor-pointer"
+      (click)="sendPasswordReset()"
+    >
+      Forgot your password?
+    </div>
+
+    @if (resetSent) {
+    <div class="text-green-600 text-sm mt-2">
+      A password reset email has been sent to your address.
+    </div>
     }
 
     <button

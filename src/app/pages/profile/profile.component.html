@@ -1,21 +1,29 @@
 @if (user()) {
-<mat-card class="max-w-md mx-auto mt-12 p-6">
-  <h2 class="text-2xl font-semibold mb-4">My Profile</h2>
-  <div class="space-y-2 text-gray-700">
-    <p><strong>Email:</strong> {{ user()?.email }}</p>
-    <p><strong>First Name:</strong> {{ user()?.firstName }}</p>
-    <p><strong>Last Name:</strong> {{ user()?.lastName }}</p>
+<mat-card class="max-w-4xl mx-auto mt-12 py-10 p-6 flex flex-col items-center">
+  <h2 class="text-xl text-center font-semibold mb-4">My Profile</h2>
+  <div class="space-y-5 text-gray-700 pl-20 w-xl">
     <p>
-      <strong>Birth Date:</strong>
+      <span class="block font-medium text-gray-800 text-sm">Email</span>
+      {{ user()?.email }}
+    </p>
+    <p class="inline-block max-w-[20ch] truncate">
+      <span class="block font-medium text-gray-800 text-sm">First Name</span>
+      {{ user()?.firstName }}
+    </p>
+    <p>
+      <span class="block font-medium text-gray-800 text-sm">Last Name</span>
+      {{ user()?.lastName }}
+    </p>
+    <p>
+      <span class="block font-medium text-gray-800 text-sm">Birth Date</span>
       {{ formattedBirthDate }}
     </p>
   </div>
   <button
-    mat-raised-button
-    class="mt-6 !bg-blue-500 !text-white"
+    class="mt-6 rounded-lg cursor-pointer w-20 bg-red-600 text-white py-1"
     (click)="edit()"
   >
-    Edit Profile
+    Edit
   </button>
 </mat-card>
 } @else {

@@ -1,6 +1,7 @@
 @if (userSignal()) {
 <div class="max-w-md mx-auto mt-12 p-6 bg-white rounded-lg shadow">
   <h2 class="text-2xl font-semibold mb-6">Edit Profile</h2>
+
   <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Email</mat-label>
@@ -10,9 +11,9 @@
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>First Name</mat-label>
       <input matInput formControlName="firstName" />
-      @if (f.firstName.touched && f.firstName.hasError('required')) {
+      @if (f['firstName'].touched && f['firstName'].hasError('required')) {
       <mat-error>First name is required</mat-error>
-      } @else if (f.firstName.touched && f.firstName.hasError('minlength')) {
+      } @if (f['firstName'].touched && f['firstName'].hasError('minlength')) {
       <mat-error>At least 2 characters</mat-error>
       }
     </mat-form-field>
@@ -20,9 +21,10 @@
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Last Name</mat-label>
       <input matInput formControlName="lastName" />
-      @if (f.lastName.touched && f.lastName.hasError('required')) {
+      @if (f['lastName'].touched && f['lastName'].hasError('required')) {
       <mat-error>Last name is required</mat-error>
-      } @else if (f.lastName.touched && f.lastName.hasError('minlength')) {
+      } @else if (f['lastName'].touched && f['lastName'].hasError('minlength'))
+      {
       <mat-error>At least 2 characters</mat-error>
       }
     </mat-form-field>
@@ -30,15 +32,82 @@
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Birth Date</mat-label>
       <input matInput type="date" formControlName="birthDate" />
-      @if (f.birthDate.touched && f.birthDate.hasError('required')) {
+      @if (f['birthDate'].touched && f['birthDate'].hasError('required')) {
       <mat-error>Birth date is required</mat-error>
       }
     </mat-form-field>
 
+    <div class="mt-4">
+      <button
+        mat-stroked-button
+        [class]="showPasswordFields ? '!hidden' : '!text-gray-800'"
+        type="button"
+        (click)="togglePasswordFields()"
+      >
+        {{ showPasswordFields ? "" : "Change password" }}
+      </button>
+    </div>
+
+    @if (showPasswordFields) {
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Current Password</mat-label>
+      <input
+        matInput
+        type="password"
+        formControlName="currentPassword"
+        autocomplete="current-password"
+      />
+      @if(f['currentPassword'].hasError('required')){
+      <mat-error> Current password is required </mat-error>
+      } @if (f['currentPassword'].hasError('invalidPassword')) {
+      <mat-error>That password is incorrect</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>New Password</mat-label>
+      <input
+        matInput
+        type="password"
+        formControlName="newPassword"
+        autocomplete="new-password"
+      />
+      @if(f['newPassword'].hasError('required')) {
+      <mat-error>New password is required</mat-error>
+      } @else if(f['newPassword'].hasError('minlength')) {
+      <mat-error>Must be at least 6 characters</mat-error>
+      } @else if(f['newPassword'].hasError('weakPassword')) {
+      <mat-error>
+        Password must include uppercase, number and special character
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Confirm New Password</mat-label>
+      <input matInput type="password" formControlName="confirmPassword" />
+      @if(f['confirmPassword'].hasError('mismatch')){
+      <mat-error> Passwords do not match </mat-error>
+      }
+    </mat-form-field>
+
+    <div
+      class="text-right text-sm -mt-4 font-medium text-blue-700 hover:underline cursor-pointer"
+      (click)="sendPasswordReset()"
+    >
+      Forgot your password?
+    </div>
+
+    @if (resetSent) {
+    <p class="text-green-600 text-center text-sm mt-2">
+      A password reset link has been sent to your email address.
+    </p>
+    } }
+
     <div class="flex space-x-4 mt-6">
       <button
         mat-raised-button
-        class="flex-1 !bg-blue-500 !text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        class="flex-1 !bg-red-600 !text-white disabled:opacity-50 disabled:cursor-not-allowed"
         type="submit"
         [disabled]="form.invalid || (loading$ | async)"
       >
@@ -47,7 +116,7 @@
       <button
         mat-stroked-button
         color="warn"
-        class="flex-1"
+        class="flex-1 !text-gray-800"
         type="button"
         (click)="cancel()"
       >

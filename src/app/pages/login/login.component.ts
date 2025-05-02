@@ -9,6 +9,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { FirebaseError } from 'firebase/app';
 
+import {
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+} from '@angular/fire/auth';
+import { Auth } from '@angular/fire/auth';
+
 @Component({
   selector: 'app-login',
   imports: [
@@ -25,10 +33,12 @@ import { FirebaseError } from 'firebase/app';
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
+  private authServ = inject(AuthService);
+  private auth = inject(Auth);
 
+  resetSent = false;
   hidePassword = true;
-  loading$ = this.auth.loading$;
+  loading$ = this.authServ.loading$;
 
   errorMessage: string | null = null;
 
@@ -68,7 +78,32 @@ export class LoginComponent {
     const password = this.form.value.password!;
 
     try {
-      await this.auth.login(email, password);
+      await this.authServ.login(email, password);
+    } catch (err) {
+      this.errorMessage = this.mapError(err);
+    }
+  }
+
+  async sendPasswordReset() {
+    const email = this.form.value.email?.trim();
+    if (!email || this.form.controls.email.invalid) {
+      this.form.controls.email.markAsTouched();
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      this.resetSent = true;
+    } catch (err) {
+      console.error('Password reset error:', err);
+      this.errorMessage =
+        'Failed to send password reset email. Please try again later.';
+    }
+  }
+
+  async loginWithGoogle() {
+    try {
+      await this.authServ.loginWithGoogle();
     } catch (err) {
       this.errorMessage = this.mapError(err);
     }

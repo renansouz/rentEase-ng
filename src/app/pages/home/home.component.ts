@@ -1,4 +1,11 @@
-import { Component, Signal, computed, inject } from '@angular/core';
+import {
+  Component,
+  Signal,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -50,7 +57,7 @@ export class HomeComponent {
   private favService = inject(FavoriteService);
   private router = inject(Router);
 
-  searchTerm: string = '';
+  searchTerm: WritableSignal<string> = signal('');
 
   userSignal = toSignal(this.auth.currentUser$, { initialValue: null });
   usersMapSignal: Signal<Record<string, UserProfile>> = toSignal(
@@ -71,6 +78,7 @@ export class HomeComponent {
     priceEnd: [this.maxPrice],
     areaStart: [this.minArea],
     areaEnd: [this.maxArea],
+    hasAc: [null],
     sortBy: ['city'],
   });
 
@@ -93,9 +101,9 @@ export class HomeComponent {
     computed(() => {
       const flats = this.allFlatsSignal() ?? [];
       const usersMap = this.usersMapSignal();
-      const { city, priceStart, priceEnd, areaStart, areaEnd, sortBy } =
+      const { city, priceStart, priceEnd, areaStart, areaEnd, hasAc, sortBy } =
         this.filterSignal();
-      const term = this.searchTerm.trim().toLowerCase();
+      const term = this.searchTerm().trim().toLowerCase();
 
       const enriched = flats.map((f) => {
         const owner = usersMap[f.ownerUID];
@@ -116,7 +124,8 @@ export class HomeComponent {
           f.rentPrice >= priceStart &&
           f.rentPrice <= priceEnd &&
           f.areaSize >= areaStart &&
-          f.areaSize <= areaEnd
+          f.areaSize <= areaEnd &&
+          (hasAc === null || f.hasAC === hasAc)
       );
 
       if (term) {
@@ -173,6 +182,11 @@ export class HomeComponent {
     } else {
       await this.favService.addFavorite(flatId);
     }
+  }
+
+  onFavoriteClick(event: MouseEvent, flatId: string) {
+    event.stopPropagation();
+    this.toggleFavorite(flatId);
   }
 
   isFavorite(flatId: string): boolean {

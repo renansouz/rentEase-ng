@@ -13,23 +13,24 @@
       >
       <input
         type="text"
-        class="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        placeholder="Search by city or landlord"
-        [(ngModel)]="searchTerm"
+        class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder="Search"
+        [value]="searchTerm()"
+        (input)="searchTerm.set($any($event.target).value)"
       />
-      @if(searchTerm) {
+      @if(searchTerm()) {
       <button
         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-        (click)="searchTerm = ''"
+        (click)="searchTerm.set('')"
       >
-        <mat-icon>close</mat-icon>
+        <mat-icon class="cursor-pointer">close</mat-icon>
       </button>
       }
     </div>
 
     <div class="flex items-center space-x-2">
       <button
-        class="!bg-red-600 !rounded-lg !text-white !font-bold"
+        class="!bg-red-600 !rounded-lg !text-white !font-medium"
         mat-button
         color="primary"
         (click)="viewNewFlat()"
@@ -63,7 +64,7 @@
         color="accent"
         (click)="toggleFilters()"
       >
-        <mat-icon>filter_list</mat-icon>
+        <mat-icon>tune</mat-icon>
         <mat-icon class="!m-0">
           {{ showFilters ? "arrow_drop_up" : "arrow_drop_down" }}
         </mat-icon>
@@ -106,6 +107,14 @@
       <input matInput type="number" formControlName="areaEnd" />
     </mat-form-field>
 
+    <mat-form-field appearance="fill">
+      <mat-select formControlName="hasAc" placeholder="Has AC?">
+        <mat-option [value]="null">All</mat-option>
+        <mat-option [value]="true">Yes</mat-option>
+        <mat-option [value]="false">No</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <div class="col-span-full flex justify-end">
       <button mat-button (click)="resetFilters()">Reset All</button>
     </div>
@@ -114,20 +123,25 @@
 
   <div class="flex flex-wrap gap-6 justify-center">
     @if (flatsSignal().length === 0) {
-    <p class="col-span-full text-center text-gray-600">No flats available.</p>
+    <p class="col-span-full text-center text-gray-600 pt-20">
+      No listings found. Please try adjusting your search or filters.
+    </p>
     } @else { @for (flat of flatsSignal(); track flat.id) {
-    <mat-card class="relative w-96 flex-shrink-0">
+    <mat-card
+      class="w-90 flex-shrink-0 cursor-pointer"
+      (click)="viewFlat(flat.id)"
+    >
       <img
         mat-card-image
         [src]="flat.photoUrl || 'fallback.png'"
         alt="Flat photo"
-        class="max-h-40 min-h-40 object-cover"
+        class="max-h-40 min-h-40 object-cover pb-3"
       />
 
       <button
         mat-icon-button
-        class="!absolute !top-2 !right-2 !text-red-500 !bg-gray-50/70"
-        (click)="toggleFavorite(flat.id)"
+        class="!absolute !top-2 !right-2 !text-red-500 !bg-gray-50/90"
+        (click)="onFavoriteClick($event, flat.id)"
         [color]="isFavorite(flat.id) ? 'warn' : undefined"
       >
         <mat-icon>
@@ -136,11 +150,14 @@
       </button>
 
       <mat-card-content class="space-y-1">
-        <p class="text-sm text-gray-700">
-          Landlord: <strong>{{ flat.ownerName }}</strong>
+        <p class="text-sm text-gray-700 flex items-center gap-2">
+          <mat-icon class="!bg-gray-300 rounded-full">person</mat-icon>
+          <strong>{{ flat.ownerName }}</strong>
         </p>
-        <div class="flex justify-between pt-3">
-          <h3 class="text-lg font-medium">
+        <div class="flex justify-between">
+          <h3
+            class="text-md font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
+          >
             {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
           </h3>
           <p class="text-gray-700">{{ flat.rentPrice | currency }}</p>
@@ -152,16 +169,6 @@
           Available: {{ flat.availableDate | date : "mediumDate" }}
         </p>
       </mat-card-content>
-
-      <mat-card-actions>
-        <button
-          mat-button
-          (click)="viewFlat(flat.id)"
-          class="!bg-red-500 !w-full !rounded-md !px-8 !text-white"
-        >
-          View
-        </button>
-      </mat-card-actions>
     </mat-card>
     } }
   </div>

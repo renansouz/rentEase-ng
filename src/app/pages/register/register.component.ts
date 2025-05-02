@@ -14,6 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
+import { FirebaseError } from 'firebase/app';
 
 function passwordPatternValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -102,6 +103,33 @@ export class RegisterComponent {
       } else {
         this.submitError = 'Registration failed. Please try again.';
       }
+    }
+  }
+
+  private mapError(err: unknown): string {
+    if (err instanceof FirebaseError) {
+      switch (err.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          return 'Email or password is incorrect';
+        case 'auth/invalid-email':
+          return 'Email address is invalid';
+        case 'auth/user-disabled':
+          return 'This account has been disabled';
+        case 'auth/invalid-credential':
+          return 'Invalid credentials provided';
+        default:
+          return err.message;
+      }
+    }
+    return 'An unexpected error occured';
+  }
+
+  async loginWithGoogle() {
+    try {
+      await this.auth.loginWithGoogle();
+    } catch (err) {
+      this.submitError = this.mapError(err);
     }
   }
 }

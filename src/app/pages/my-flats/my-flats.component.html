@@ -12,7 +12,7 @@
       </p>
     </div>
     <button
-      class="!bg-red-600 !rounded-lg !text-white !font-bold"
+      class="!bg-red-600 !rounded-lg !text-white !font-medium"
       mat-button
       color="primary"
       (click)="addNewFlat()"
@@ -53,10 +53,19 @@
       </mat-card-content>
 
       <mat-card-actions class="flex justify-between px-2 pb-2">
-        <button mat-button (click)="viewEdit(flat.id)">
+        <button
+          mat-button
+          (click)="viewEdit(flat.id)"
+          class="!text-gray-800 !bg-gray-200"
+        >
           <mat-icon class="mr-1">edit</mat-icon>Edit
         </button>
-        <button mat-button color="warn" (click)="delete(flat.id)">
+        <button
+          mat-button
+          color="warn"
+          (click)="delete(flat.id)"
+          class="!text-red-800 !bg-gray-200"
+        >
           <mat-icon class="mr-1">delete</mat-icon>Delete
         </button>
       </mat-card-actions>

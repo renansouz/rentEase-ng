@@ -62,4 +62,9 @@ export class FavoritesComponent {
   async removeFavorite(id: string) {
     await this.favService.removeFavorite(id);
   }
+
+  onRemoveClick(event: MouseEvent, flatId: string) {
+    event.stopPropagation();
+    this.removeFavorite(flatId);
+  }
 }

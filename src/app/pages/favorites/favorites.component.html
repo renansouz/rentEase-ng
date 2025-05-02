@@ -9,7 +9,10 @@
     @if (favoriteFlatsSignal().length === 0) {
     <p class="text-gray-600">You have no favorite flats yet.</p>
     } @else { @for (flat of favoriteFlatsSignal(); track flat.id) {
-    <mat-card class="relative w-96 flex-shrink-0">
+    <mat-card
+      class="relative w-90 flex-shrink-0 cursor-pointer"
+      (click)="viewFlat(flat.id)"
+    >
       <img
         mat-card-image
         [src]="flat.photoUrl || 'fallback.png'"
@@ -19,15 +22,17 @@
 
       <button
         mat-icon-button
-        class="!absolute !top-2 !right-2 !text-red-500 !bg-gray-50/70"
-        (click)="removeFavorite(flat.id)"
+        class="!absolute !top-2 !right-2 !text-red-500 !bg-gray-50/90"
+        (click)="onRemoveClick($event, flat.id)"
       >
         <mat-icon>delete</mat-icon>
       </button>
 
       <mat-card-content class="space-y-1">
         <div class="flex justify-between pt-3">
-          <h3 class="text-lg font-medium">
+          <h3
+            class="text-md font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
+          >
             {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
           </h3>
           <p class="text-gray-700">{{ flat.rentPrice | currency }}</p>
@@ -39,16 +44,6 @@
           Available: {{ flat.availableDate | date : "mediumDate" }}
         </p>
       </mat-card-content>
-
-      <mat-card-actions>
-        <button
-          mat-button
-          (click)="viewFlat(flat.id)"
-          class="!bg-blue-500 !w-full !rounded-md !px-8 !text-white"
-        >
-          View
-        </button>
-      </mat-card-actions>
     </mat-card>
     } }
   </div>

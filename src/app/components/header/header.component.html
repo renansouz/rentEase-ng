@@ -1,8 +1,9 @@
 <header
+  [ngClass]="pageBg()"
   [class]="
     user()
       ? 'bg-gray-900 text-white shadow p-4 flex items-center justify-between'
-      : 'max-h-[76px] bg-gray-50'
+      : 'max-h-[76px]  text-white shadow-none p-4 flex items-center justify-between'
   "
 >
   @if (user()) {
@@ -10,10 +11,12 @@
     <a routerLink="/" class="flex items-center">
       <img src="rentease-logo.png" alt="RentEase" class="h-11" />
     </a>
-    <span class="text-sm">
-      Hi, <span>{{ user()?.firstName }}</span
-      >! 👋
+    <span class="text-sm inline-block max-w-[12ch] truncate">
+      Hi,
+      <span class="font-medium">{{ user()?.firstName }}</span
+      >!
     </span>
+    👋
   </div>
 
   <nav class="flex space-x-4">
@@ -76,7 +79,7 @@
   </div>
   } @else {
   <a routerLink="/" class="flex items-center">
-    <img src="rentease-logo-red.png" alt="RentEase" class="h-28 -mt-5" />
+    <img src="rentease-logo-red.png" alt="RentEase" class="h-28" />
   </a>
   }
 </header>

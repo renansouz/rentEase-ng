@@ -45,9 +45,7 @@ export class AppComponent {
           currentRoute = currentRoute.firstChild;
         }
 
-        const component = currentRoute.component;
-
-        this.showHeader.set(component !== PageNotFoundComponent);
+        this.showHeader.set(currentRoute.component !== PageNotFoundComponent);
       });
   }
 }

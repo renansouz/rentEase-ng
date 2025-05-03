@@ -4,7 +4,15 @@
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
   } @else {
-  <mat-card class="space-y-4 p-10">
+  <button
+    mat-icon-button
+    class="absolute top-0 !mb-2 left-0 !bg-gray-100 !flex !justify-center rounded-full cursor-pointer"
+    aria-label="Go back"
+    (click)="goBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <mat-card class="space-y-4 relative p-10">
     @if(flatSignal()!.photoUrl) {
     <img
       [src]="flatSignal()!.photoUrl"
@@ -34,8 +42,6 @@
         {{ ownerName() || flatSignal()!.ownerUID }}
       </button>
     </p>
-
-    <mat-divider></mat-divider>
 
     @if (isOwner()) {
     <button

@@ -1,6 +1,6 @@
 import { Component, inject, computed, Signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 import { MatCardModule } from '@angular/material/card';
@@ -56,6 +56,7 @@ export class FlatViewComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private db = inject(Firestore);
+  private location = inject(Location);
 
   private flatId = this.route.snapshot.paramMap.get('id')!;
   private flat$ = this.flatService.getFlat(this.flatId);
@@ -190,5 +191,9 @@ export class FlatViewComponent {
 
   viewOwnerProfile() {
     this.router.navigate(['/users', this.flatSignal()!.ownerUID]);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

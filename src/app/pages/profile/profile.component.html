@@ -1,5 +1,13 @@
 @if (user()) {
-<mat-card class="max-w-4xl mx-auto mt-12 py-10 p-6 flex flex-col items-center">
+<mat-card class="max-w-4xl mx-auto mt-5 py-10 p-6 flex flex-col items-center">
+  <button
+    mat-icon-button
+    class="absolute top-0 !mb-2 right-96 !bg-gray-200/60 !flex !justify-center rounded-full cursor-pointer"
+    aria-label="Go back"
+    (click)="goBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
   <h2 class="text-xl text-center font-semibold mb-4">My Profile</h2>
   <div class="space-y-5 text-gray-700 pl-20 w-xl">
     <p>

@@ -1,4 +1,12 @@
-<div class="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-lg shadow">
+<div class="max-w-2xl relative mx-auto mt-12 p-6 bg-white rounded-lg shadow">
+  <button
+    mat-icon-button
+    class="absolute top-0 left-0 !bg-gray-100 !flex !justify-center rounded-full cursor-pointer"
+    aria-label="Go back"
+    (click)="goBack()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+  </button>
   <h2 class="text-3xl font-semibold text-center mb-8">Edit Flat</h2>
 
   <form
@@ -70,11 +78,13 @@
       </mat-form-field>
     </div>
 
-    <div class="md:col-span-2 grid grid-cols-3 gap-6 items-end">
-      <div>
-        <mat-checkbox formControlName="hasAC"
-          >Has Air Conditioning</mat-checkbox
-        >
+    <div class="md:col-span-2 grid grid-cols-3 gap-6 items-center">
+      <div
+        class="flex bg-gray-300/65 cursor-pointer -mt-4 p-[0.4rem] border-b-gray-800 border-b items-center gap-2"
+        (click)="checkboxAC.toggle()"
+      >
+        <mat-checkbox #checkboxAC formControlName="hasAC"></mat-checkbox>
+        <label class="text-sm font-medium text-gray-700">Has AC?</label>
       </div>
 
       <div>

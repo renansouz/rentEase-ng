@@ -9,7 +9,7 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -55,6 +55,7 @@ export class NewFlatComponent {
   private flatService = inject(FlatService);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private location = inject(Location);
 
   readonly MAX_FILE_SIZE = 1 * 1024 * 1024;
 
@@ -127,5 +128,9 @@ export class NewFlatComponent {
 
     await this.flatService.createFlat(payload);
     this.router.navigate(['/my-flats']);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

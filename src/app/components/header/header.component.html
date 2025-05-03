@@ -2,13 +2,13 @@
   [ngClass]="pageBg()"
   [class]="
     user()
-      ? 'bg-gray-900 text-white shadow p-4 flex items-center justify-between'
+      ? 'bg-gray-900 text-white shadow p-4 flex max-sm:flex-col max-sm:space-y-2 items-center justify-between'
       : 'max-h-[76px]  text-white shadow-none p-4 flex items-center justify-between'
   "
 >
   @if (user()) {
   <div class="flex items-center space-x-4">
-    <a routerLink="/" class="flex items-center">
+    <a routerLink="/" class="flex items-center max-md:hidden">
       <img src="rentease-logo.png" alt="RentEase" class="h-11" />
     </a>
     <span class="text-sm inline-block max-w-[12ch] truncate">
@@ -19,7 +19,7 @@
     👋
   </div>
 
-  <nav class="flex space-x-4">
+  <nav class="flex space-x-4 max-md:text-sm">
     <a
       routerLink="/"
       routerLinkActive="!font-extrabold"
@@ -53,7 +53,7 @@
     }
   </nav>
 
-  <div class="flex items-center space-x-4">
+  <div class="flex items-center space-x-4 max-md:text-sm">
     <button
       [matMenuTriggerFor]="profileMenu"
       class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10 flex items-center space-x-2 cursor-pointer"

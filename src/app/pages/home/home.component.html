@@ -4,42 +4,48 @@
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
   } @else {
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-semibold">Flats</h1>
+  <div class="flex justify-between items-center mb-6 flex-col lg:flex-row">
+    <h1 class="text-2xl font-semibold mb-16 lg:mb-0">Flats</h1>
 
-    <div class="relative mx-4 flex-1 max-w-md">
-      <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-        >search</mat-icon
-      >
-      <input
-        type="text"
-        class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        placeholder="Search"
-        [value]="searchTerm()"
-        (input)="searchTerm.set($any($event.target).value)"
-      />
-      @if(searchTerm()) {
-      <button
-        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-        (click)="searchTerm.set('')"
-      >
-        <mat-icon class="cursor-pointer">close</mat-icon>
-      </button>
-      }
+    <div
+      class="absolute max-sm:top-60 top-42 lg:top-32 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+    >
+      <div class="relative xl:w-md max-sm:w-86">
+        <mat-icon
+          class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+        >
+          search
+        </mat-icon>
+        <input
+          type="text"
+          class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Search"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+        />
+        @if(searchTerm()) {
+        <button
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          (click)="searchTerm.set('')"
+        >
+          <mat-icon class="cursor-pointer">close</mat-icon>
+        </button>
+        }
+      </div>
     </div>
 
-    <div class="flex items-center space-x-2">
+    <div class="flex justify-end items-center space-x-2 space-y-2">
       <button
-        class="!bg-red-600 !rounded-lg !text-white !font-medium"
+        class="!text-xs lg:!text-sm !bg-red-600 !rounded-lg !text-white !font-medium"
         mat-button
         color="primary"
         (click)="viewNewFlat()"
       >
         <mat-icon>add</mat-icon>
-        Add New Flat
+        Add Flat
       </button>
       <button
-        class="!bg-gray-300 !rounded-lg !border !border-gray-800 !text-gray-800"
+        class="!text-xs lg:!text-sm !bg-gray-300 !rounded-lg !border !border-gray-800 !text-gray-800"
         mat-button
         color="primary"
         [matMenuTriggerFor]="sortMenu"
@@ -121,14 +127,16 @@
   </form>
   }
 
-  <div class="flex flex-wrap gap-6 justify-center">
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-6"
+  >
     @if (flatsSignal().length === 0) {
     <p class="col-span-full text-center text-gray-600 pt-20">
       No listings found. Please try adjusting your search or filters.
     </p>
     } @else { @for (flat of flatsSignal(); track flat.id) {
     <mat-card
-      class="w-90 flex-shrink-0 cursor-pointer"
+      class="min-w-74 w-full cursor-pointer"
       (click)="viewFlat(flat.id)"
     >
       <img
@@ -152,22 +160,22 @@
       <mat-card-content class="space-y-1">
         <p class="text-sm text-gray-700 flex items-center gap-2">
           <mat-icon class="!bg-gray-300 rounded-full">person</mat-icon>
-          <strong>{{ flat.ownerName }}</strong>
+          <strong class="">{{ flat.ownerName }}</strong>
         </p>
-        <div class="flex justify-between">
-          <h3
-            class="text-md font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
-          >
-            {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
-          </h3>
-          <p class="text-gray-700">{{ flat.rentPrice | currency }}</p>
-        </div>
-        <p class="text-gray-600">
+        <h3
+          class="text-md font-medium whitespace-nowrap overflow-hidden overflow-ellipsis"
+        >
+          {{ flat.streetNumber }}, {{ flat.streetName }}, {{ flat.city }}
+        </h3>
+        <p class="text-gray-600 text-sm">
           {{ flat.areaSize }} sqm · Built {{ flat.yearBuilt }}
         </p>
-        <p class="text-gray-500">
-          Available: {{ flat.availableDate | date : "mediumDate" }}
-        </p>
+        <div class="flex justify-between">
+          <p class="text-gray-500 text-sm">
+            Available: {{ flat.availableDate | date : "mediumDate" }}
+          </p>
+          <p class="text-gray-700">{{ flat.rentPrice | currency }}</p>
+        </div>
       </mat-card-content>
     </mat-card>
     } }

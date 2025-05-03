@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { map, filter, switchMap } from 'rxjs/operators';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,6 +15,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { FlatService, Flat } from '../../../services/flat.service';
 
@@ -22,6 +25,8 @@ import { FlatService, Flat } from '../../../services/flat.service';
   selector: 'app-edit-flat',
   imports: [
     CommonModule,
+    MatIcon,
+    MatSnackBarModule,
     ReactiveFormsModule,
     RouterModule,
     MatFormFieldModule,
@@ -39,6 +44,8 @@ export class EditFlatComponent {
   private route = inject(ActivatedRoute);
   private flatService = inject(FlatService);
   private router = inject(Router);
+  private location = inject(Location);
+  private snackBar = inject(MatSnackBar);
 
   id!: string;
 
@@ -91,7 +98,14 @@ export class EditFlatComponent {
         },
         error: (err) => {
           console.error('Failed to load flat:', err);
-          alert('Failed to load flat. Please try again.');
+          this.snackBar.open(
+            'Failed to load flat. Please try again.',
+            'Close',
+            {
+              duration: 4000,
+              panelClass: ['snackbar-error'],
+            }
+          );
           this.router.navigate(['/my-flats']);
         },
       });
@@ -100,22 +114,39 @@ export class EditFlatComponent {
   async onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      alert('Please correct the errors before submitting.');
+      this.snackBar.open(
+        'Please correct the errors before submitting.',
+        'Close',
+        {
+          duration: 4000,
+          panelClass: ['snackbar-error'],
+        }
+      );
       return;
     }
 
     try {
       const updates = this.form.value as Partial<Omit<Flat, 'ownerUID'>>;
       await this.flatService.updateFlat(this.id, updates);
-      alert('Flat updated successfully!');
+      this.snackBar.open('Flat updated successfully!', 'Close', {
+        duration: 3000,
+        panelClass: ['snackbar-success'],
+      });
       this.router.navigate(['/my-flats']);
     } catch (err) {
       console.error('Failed to update flat:', err);
-      alert('Failed to update flat. Please try again.');
+      this.snackBar.open('Failed to update flat. Please try again.', 'Close', {
+        duration: 4000,
+        panelClass: ['snackbar-error'],
+      });
     }
   }
 
   get f() {
     return this.form.controls;
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

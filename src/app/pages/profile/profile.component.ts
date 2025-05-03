@@ -1,23 +1,25 @@
 import { Component, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 import { AuthService, UserProfile } from '../../services/auth.service';
 import { Timestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, MatCardModule, MatButtonModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
 export class ProfileComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private location = inject(Location);
 
   user: Signal<UserProfile | null> = toSignal(this.auth.currentUser$, {
     initialValue: null,
@@ -45,5 +47,9 @@ export class ProfileComponent {
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

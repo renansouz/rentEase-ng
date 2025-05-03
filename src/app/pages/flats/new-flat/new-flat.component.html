@@ -72,11 +72,13 @@
       </mat-form-field>
     </div>
 
-    <div class="md:col-span-2 grid grid-cols-3 gap-6 items-end">
-      <div>
-        <mat-checkbox formControlName="hasAC"
-          >Has Air Conditioning</mat-checkbox
-        >
+    <div class="md:col-span-2 grid grid-cols-3 gap-6 items-center">
+      <div
+        class="flex bg-gray-200 cursor-pointer -mt-4 p-[0.4rem] border-b-gray-800 border-b-2 items-center gap-2"
+        (click)="checkboxAC.toggle()"
+      >
+        <mat-checkbox #checkboxAC formControlName="hasAC"></mat-checkbox>
+        <label class="text-sm font-medium text-gray-700">Has AC?</label>
       </div>
 
       <div>
@@ -120,7 +122,7 @@
         type="file"
         accept="image/*"
         (change)="onFileSelected($event)"
-        class="block w-full"
+        class="block cursor-pointer bg-gray-200 p-3 rounded-lg text-center"
       />
       @if (photoError) {
       <p class="text-red-500 text-sm mt-1">{{ photoError }}</p>
@@ -136,11 +138,13 @@
     <div class="md:col-span-2 flex justify-center mt-4">
       <button
         mat-flat-button
+        class="!bg-red-600 !text-white !rounded-lg disabled:!bg-gray-500"
         color="primary"
         [disabled]="form.invalid || photoError"
         type="submit"
       >
         Add New Flat
+        <mat-icon class="ml-2">add</mat-icon>
       </button>
     </div>
   </form>

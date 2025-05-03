@@ -17,6 +17,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
 
 import { FlatService, Flat } from '../../../services/flat.service';
 import { AuthService, UserProfile } from '../../../services/auth.service';
@@ -44,6 +45,7 @@ function notInPastValidator(): ValidatorFn {
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatIconModule,
   ],
   templateUrl: './new-flat.component.html',
   styleUrl: './new-flat.component.css',

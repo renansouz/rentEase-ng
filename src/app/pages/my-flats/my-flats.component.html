@@ -26,7 +26,10 @@
     @if (flatsSignal()?.length === 0) {
     <p class="text-gray-600 pt-20">You haven't added any flats yet.</p>
     } @else { @for (flat of flatsSignal(); track flat.id) {
-    <mat-card class="relative w-96 flex-shrink-0">
+    <mat-card
+      class="relative w-96 flex-shrink-0 cursor-pointer"
+      (click)="viewFlat(flat.id)"
+    >
       <div class="relative h-40 w-full overflow-hidden rounded-t-xl">
         <img
           mat-card-image
@@ -56,6 +59,7 @@
         <button
           mat-button
           (click)="viewEdit(flat.id)"
+          (click)="onEditClick($event, flat.id)"
           class="!text-gray-800 !bg-gray-200"
         >
           <mat-icon class="mr-1">edit</mat-icon>Edit
@@ -63,7 +67,7 @@
         <button
           mat-button
           color="warn"
-          (click)="delete(flat.id)"
+          (click)="onDeleteClick($event, flat.id)"
           class="!text-red-800 !bg-gray-200"
         >
           <mat-icon class="mr-1">delete</mat-icon>Delete

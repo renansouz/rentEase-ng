@@ -30,7 +30,7 @@
 
     <p class="text-gray-500">
       Owner:
-      <button mat-button (click)="viewOwnerProfile()">
+      <button mat-button class="!text-red-700" (click)="viewOwnerProfile()">
         {{ ownerName() || flatSignal()!.ownerUID }}
       </button>
     </p>
@@ -38,7 +38,11 @@
     <mat-divider></mat-divider>
 
     @if (isOwner()) {
-    <button mat-flat-button color="primary" (click)="edit()">
+    <button
+      mat-flat-button
+      class="!bg-red-600 !text-white mx-auto !rounded-lg w-fit"
+      (click)="edit()"
+    >
       <mat-icon>edit</mat-icon> Edit Flat
     </button>
 
@@ -74,7 +78,7 @@
       <button
         mat-flat-button
         color="accent"
-        class="disabled:cursor-not-allowed"
+        class="disabled:cursor-not-allowed !bg-red-600 !text-white mx-auto !rounded-lg w-fit"
         [disabled]="sent || msgForm.invalid"
       >
         <mat-icon>send</mat-icon> Send

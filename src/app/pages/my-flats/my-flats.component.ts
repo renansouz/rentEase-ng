@@ -49,8 +49,18 @@ export class MyFlatsComponent {
     this.router.navigate(['/flats', id, 'edit']);
   }
 
+  onEditClick(event: MouseEvent, flatId: string) {
+    event.stopPropagation();
+    this.viewEdit(flatId);
+  }
+
   async delete(id: string) {
     await this.flatService.deleteFlat(id);
+  }
+
+  onDeleteClick(event: MouseEvent, flatId: string) {
+    event.stopPropagation();
+    this.delete(flatId);
   }
 
   formatAvailableDate(flat: Flat & { id: string }): string {
@@ -68,5 +78,9 @@ export class MyFlatsComponent {
 
   addNewFlat() {
     this.router.navigate(['/flats/new']);
+  }
+
+  viewFlat(id: string) {
+    this.router.navigate(['/flats', id]);
   }
 }

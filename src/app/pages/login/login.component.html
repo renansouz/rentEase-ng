@@ -1,7 +1,7 @@
-<div class="max-w-lg mx-auto mt-[2%] p-6 bg-white rounded-lg shadow">
+<div class="max-w-lg mx-auto mt-[2%] p-6 bg-white md:rounded-lg shadow">
   <h2 class="text-2xl font-semibold mb-1">Welcome! Log in below.</h2>
   <button
-    class="w-full py-1 my-5 rounded-lg border border-gray-300 flex items-center justify-center space-x-2 hover:bg-gray-50 cursor-pointer"
+    class="w-10/12 py-1 my-5 rounded-lg border border-gray-300 flex items-center justify-center space-x-2 hover:bg-gray-50 cursor-pointer"
     type="button"
     (click)="loginWithGoogle()"
     [disabled]="loading$ | async"

@@ -1,15 +1,17 @@
 @if (user()) {
-<mat-card class="max-w-4xl mx-auto mt-5 py-10 p-6 flex flex-col items-center">
+<mat-card
+  class="max-w-xl lg:max-w-4xl min-h-[calc(100dvh-148px)] max-sm:!rounded-none mx-auto mt-5 lg:py-10 p-6 flex flex-col items-center max-sm:!-my-4"
+>
   <button
     mat-icon-button
-    class="absolute top-0 !mb-2 right-96 !bg-gray-200/60 !flex !justify-center rounded-full cursor-pointer"
+    class="absolute top-0 !mb-2 right-40 md:right-50 lg:right-96 !bg-gray-200/60 !flex !justify-center rounded-full cursor-pointer"
     aria-label="Go back"
     (click)="goBack()"
   >
     <mat-icon>arrow_back</mat-icon>
   </button>
   <h2 class="text-xl text-center font-semibold mb-4">My Profile</h2>
-  <div class="space-y-5 text-gray-700 pl-20 w-xl">
+  <div class="space-y-5 text-gray-700 pl-30 md:pl-20 w-xl">
     <p>
       <span class="block font-medium text-gray-800 text-sm">Email</span>
       {{ user()?.email }}

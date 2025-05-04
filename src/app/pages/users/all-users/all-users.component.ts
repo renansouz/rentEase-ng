@@ -1,4 +1,11 @@
-import { Component, inject, Signal, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  Signal,
+  computed,
+  WritableSignal,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   Firestore,
@@ -22,6 +29,8 @@ import { Router } from '@angular/router';
 import { AuthService, UserProfile } from '../../../services/auth.service';
 import { FlatService, Flat } from '../../../services/flat.service';
 
+const INCREMENT = 10;
+
 @Component({
   selector: 'app-all-users',
   imports: [
@@ -42,6 +51,7 @@ export class AllUsersComponent {
   private fb = inject(FormBuilder);
   private flatService = inject(FlatService);
   private auth = inject(AuthService);
+  pageSize: WritableSignal<number> = signal(INCREMENT);
 
   currentUser = toSignal(this.auth.currentUser$, { initialValue: null });
 
@@ -65,10 +75,10 @@ export class AllUsersComponent {
 
   filterForm: FormGroup = this.fb.group({
     userType: ['all'],
-    minAge: [18],
-    maxAge: [120],
+    minAge: [0],
+    maxAge: [150],
     minFlats: [0],
-    maxFlats: [50],
+    maxFlats: [100],
     onlyAdmins: [null],
     sortBy: ['firstName'],
   });
@@ -121,5 +131,33 @@ export class AllUsersComponent {
 
   viewUserProfile(uid: string) {
     this.router.navigate(['/users', uid]);
+  }
+
+  filteredUsers = this.displayedUsers;
+
+  limitedUsers = computed(() => this.filteredUsers().slice(0, this.pageSize()));
+
+  nextLimit = computed(() =>
+    Math.min(this.pageSize() + INCREMENT, this.filteredUsers().length)
+  );
+
+  get canLoadMore() {
+    return this.filteredUsers().length > this.pageSize();
+  }
+
+  loadMore() {
+    this.pageSize.update((n) => n + INCREMENT);
+  }
+
+  getDisplayedColumns() {
+    return [
+      'firstName',
+      'lastName',
+      'age',
+      'flatsCount',
+      'isAdmin',
+      'profile',
+      'actions',
+    ];
   }
 }

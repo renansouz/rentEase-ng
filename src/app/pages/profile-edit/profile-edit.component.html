@@ -1,6 +1,8 @@
 @if (userSignal()) {
-<div class="max-w-md mx-auto mt-12 p-6 bg-white rounded-lg shadow">
-  <h2 class="text-2xl font-semibold mb-6">Edit Profile</h2>
+<div
+  class="max-w-md mx-auto mt-12 max-sm:-my-4 max-sm:rounded-lg p-6 bg-white rounded-lg shadow"
+>
+  <h2 class="text-2xl font-semibold max-sm:text-center mb-6">Edit Profile</h2>
 
   <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
     <mat-form-field appearance="fill" class="w-full">

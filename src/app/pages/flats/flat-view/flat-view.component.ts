@@ -23,8 +23,9 @@ import { combineLatest, of } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { FlatService, Flat } from '../../../services/flat.service';
-import { Message, MessageService } from '../../../services/message.service';
+import { MessageService, Message } from '../../../services/message.service';
 import { AuthService, UserProfile } from '../../../services/auth.service';
+import { ChatService, ChatPreview } from '../../../services/chat.service';
 
 interface EnrichedMessage extends Message {
   senderName: string;
@@ -52,6 +53,7 @@ export class FlatViewComponent {
   private route = inject(ActivatedRoute);
   private flatService = inject(FlatService);
   private msgService = inject(MessageService);
+  private chatService = inject(ChatService);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -60,9 +62,7 @@ export class FlatViewComponent {
 
   private flatId = this.route.snapshot.paramMap.get('id')!;
   private flat$ = this.flatService.getFlat(this.flatId);
-  private user$ = this.auth.currentUser$.pipe(
-    filter((u): u is UserProfile => u !== null)
-  );
+
   flatSignal = toSignal(this.flat$, { initialValue: null });
 
   userSignal = toSignal(this.auth.currentUser$, { initialValue: null });
@@ -77,29 +77,44 @@ export class FlatViewComponent {
     this.flat$.pipe(
       filter((f): f is Flat & { id: string } => f !== null),
       switchMap((f) => {
-        const userRef = doc(
+        const ref = doc(
           this.db,
           'users',
           f.ownerUID
         ) as DocumentReference<UserProfile>;
-
-        return docData<UserProfile>(userRef, { idField: 'uid' });
+        return docData<UserProfile>(ref, { idField: 'uid' });
       })
     ),
     { initialValue: null }
   );
-
   ownerName = computed(() => {
     const o = this.ownerSignal();
     return o ? `${o.firstName} ${o.lastName}` : '';
   });
 
-  readonly defaultMessage = 'Hi, is this available?';
+  private myChats$ = this.auth.currentUser$.pipe(
+    filter((u) => !!u),
+    switchMap((u) => this.chatService.listenChatsForUser(u!.uid))
+  );
+  chatsSignal = toSignal(this.myChats$, { initialValue: [] as ChatPreview[] });
 
+  hasChat = computed(() =>
+    this.chatsSignal().some((c) => c.flatId === this.flatId)
+  );
+
+  chatId = computed(
+    () => this.chatsSignal().find((c) => c.flatId === this.flatId)?.chatId
+  );
+
+  readonly defaultMessage = 'Hi, is this available?';
   msgForm = this.fb.group({
     content: [this.defaultMessage, Validators.required],
   });
-  private ownerMessages$ = combineLatest([this.user$, this.flat$]).pipe(
+
+  private ownerMessages$ = combineLatest([
+    this.auth.currentUser$.pipe(filter((u): u is UserProfile => !!u)),
+    this.flat$.pipe(filter((f): f is Flat & { id: string } => !!f)),
+  ]).pipe(
     switchMap(([user, flat]) =>
       user.uid === flat.ownerUID
         ? this.msgService.getMessages(this.flatId)
@@ -109,18 +124,15 @@ export class FlatViewComponent {
 
   private enrichedMessages$ = this.ownerMessages$.pipe(
     switchMap((msgs) => {
-      if (msgs.length === 0) {
-        return of<EnrichedMessage[]>([]);
-      }
+      if (msgs.length === 0) return of<EnrichedMessage[]>([]);
       const withProfile$ = msgs.map((msg) => {
-        const senderRef = doc(
+        const ref = doc(
           this.db,
           'users',
           msg.senderUID
         ) as DocumentReference<UserProfile>;
-
-        return docData<UserProfile>(senderRef, { idField: 'uid' }).pipe(
-          filter((u): u is UserProfile => u !== undefined),
+        return docData<UserProfile>(ref, { idField: 'uid' }).pipe(
+          filter((u) => !!u),
           map((u) => ({
             ...msg,
             senderName: `${u.firstName} ${u.lastName}`,
@@ -129,7 +141,7 @@ export class FlatViewComponent {
           catchError(() =>
             of<EnrichedMessage>({
               ...msg,
-              senderName: 'Unknown user',
+              senderName: 'Unknown',
               senderEmail: '',
             })
           )
@@ -138,14 +150,9 @@ export class FlatViewComponent {
       return combineLatest(withProfile$);
     })
   );
-
   messagesSignal: Signal<EnrichedMessage[]> = toSignal(this.enrichedMessages$, {
     initialValue: [],
   });
-
-  edit() {
-    this.router.navigate(['/flats', this.flatId, 'edit']);
-  }
 
   sent = false;
 
@@ -153,34 +160,24 @@ export class FlatViewComponent {
     const content = this.msgForm.value.content?.trim();
     if (!content) return;
 
-    await this.msgService.sendMessage(this.flatId, content);
-    this.sent = true;
+    const ownerUID = this.flatSignal()!.ownerUID;
+    const chatId = await this.chatService.getOrCreateChat(
+      this.flatId,
+      ownerUID
+    );
 
-    this.msgForm.disable();
-    this.msgForm.patchValue({ content: '' });
+    await this.chatService.sendMessage(chatId, content);
+
+    this.sent = true;
   }
 
-  private toDate(t: any): Date {
-    if (t instanceof Date) return t;
-    if (t?.toDate) return t.toDate();
+  private toDate(ts: any): Date {
+    if (ts instanceof Date) return ts;
+    if (ts?.toDate) return ts.toDate();
     return new Date(0);
   }
-
-  pending: Signal<boolean> = computed(() => {
-    const msgs = this.messagesSignal();
-    const me = this.userSignal()?.uid;
-    if (!me) return false;
-    const userMsgs = msgs.filter((m) => m.senderUID === me);
-    if (userMsgs.length === 0) return false;
-    const ownerMsgs = msgs.filter((m) => m.senderUID !== me);
-    if (ownerMsgs.length === 0) return true;
-    const lastUser = this.toDate(userMsgs.at(-1)!.createdAt);
-    const lastOwner = this.toDate(ownerMsgs.at(-1)!.createdAt);
-    return lastUser > lastOwner;
-  });
-
   formatDate(ts?: any) {
-    const d = ts instanceof Date ? ts : ts?.toDate?.();
+    const d = this.toDate(ts);
     return d
       ? new Intl.DateTimeFormat('en-US', {
           dateStyle: 'medium',
@@ -189,10 +186,12 @@ export class FlatViewComponent {
       : '';
   }
 
+  edit() {
+    this.router.navigate(['/flats', this.flatId, 'edit']);
+  }
   viewOwnerProfile() {
     this.router.navigate(['/users', this.flatSignal()!.ownerUID]);
   }
-
   goBack() {
     this.location.back();
   }

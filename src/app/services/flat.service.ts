@@ -15,6 +15,7 @@ import {
 import { Observable } from 'rxjs';
 
 export interface Flat {
+  id: string;
   ownerUID: string;
   city: string;
   streetName: string;

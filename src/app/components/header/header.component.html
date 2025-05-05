@@ -54,6 +54,17 @@
   </nav>
 
   <div class="flex items-center space-x-4 max-md:text-sm">
+    <button mat-icon-button class="relative" (click)="toggleChats.emit()">
+      <mat-icon>chat_bubble</mat-icon>
+      @if(unreadCount() > 0) {
+      <span
+        class="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full"
+      >
+        {{ unreadCount() }}
+      </span>
+      }
+    </button>
+
     <button
       [matMenuTriggerFor]="profileMenu"
       class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10 flex items-center space-x-2 cursor-pointer"

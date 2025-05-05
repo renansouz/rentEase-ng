@@ -18,6 +18,9 @@ import { ProfileEditComponent } from './pages/profile-edit/profile-edit.componen
 import { AllUsersComponent } from './pages/users/all-users/all-users.component';
 import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.component';
 import { PublicProfileComponent } from './pages/public-profile/public-profile.component';
+import { ChatPageComponent } from './pages/chat/chat-page/chat-page.component';
+import { ChatListComponent } from './pages/chat/chat-list/chat-list.component';
+import { ChatWindowComponent } from './pages/chat/chat-window/chat-window.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
@@ -77,6 +80,15 @@ export const routes: Routes = [
     path: 'users',
     component: AllUsersComponent,
     canActivate: [authGuard, adminGuard],
+  },
+  {
+    path: 'chats',
+    component: ChatPageComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: ChatListComponent }, // if you go to /chats
+      { path: ':chatId', component: ChatWindowComponent }, // deep-link to a specific chat
+    ],
   },
 
   { path: '**', component: PageNotFoundComponent },

@@ -3,11 +3,16 @@
   <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
 </div>
 } @else { @if(showHeader() ) {
-<app-header></app-header>
-}
-<div
-  class="bg-gray-300 py-4 min-h-[calc(100dvh-148px)] sm:min-h-[calc(100dvh-76px)]"
->
-  <router-outlet></router-outlet>
+<app-header (toggleChats)="showChats.set(!showChats())"></app-header>} }
+
+<div class="flex">
+  @if(showChats()) {
+  <app-chat-sidebar class="hidden md:block"></app-chat-sidebar>
+  }
+
+  <div
+    class="flex-1 bg-gray-300 py-4 min-h-[calc(100dvh-148px)] sm:min-h-[calc(100dvh-76px)]"
+  >
+    <router-outlet></router-outlet>
+  </div>
 </div>
-}

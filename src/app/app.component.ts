@@ -8,6 +8,7 @@ import {
 import { PageNotFoundComponent } from './pages/page-not-found/page-not-found.component';
 
 import { HeaderComponent } from './components/header/header.component';
+import { ChatSidebarComponent } from './components/chat-sidebar/chat-sidebar.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { first, filter } from 'rxjs';
@@ -16,7 +17,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, MatProgressSpinnerModule],
+  imports: [
+    RouterOutlet,
+    HeaderComponent,
+    MatProgressSpinnerModule,
+    ChatSidebarComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -24,7 +30,9 @@ export class AppComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
   showHeader = signal(true);
+  showChats = signal(false);
 
   user: Signal<UserProfile | null> = toSignal(this.auth.currentUser$, {
     initialValue: null,

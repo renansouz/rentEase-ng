@@ -1,0 +1,16 @@
+<ul class="divide-y">
+  @for(c of enriched(); track c.chatId) {
+  <li
+    class="p-3 flex items-center hover:bg-gray-100 cursor-pointer"
+    (click)="goTo(c)"
+  >
+    <img [src]="c.photoUrl" class="w-12 h-12 object-cover rounded mr-3" />
+    <div>
+      <div class="font-medium">{{ c.title }}</div>
+      <div class="text-sm text-gray-500">
+        Last: {{ c.lastMessageAt?.toDate() | date : "short" }}
+      </div>
+    </div>
+  </li>
+  }
+</ul>

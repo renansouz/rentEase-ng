@@ -1,4 +1,12 @@
-import { Component, computed, inject, signal, Signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  Output,
+  signal,
+  Signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -14,7 +22,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { AuthService, UserProfile } from '../../services/auth.service';
-import { filter, first } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
+import { ChatPreview, ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-header',
@@ -29,12 +38,48 @@ import { filter, first } from 'rxjs';
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {
+  @Output() toggleChats = new EventEmitter<void>();
+
   private auth = inject(AuthService);
+  private chatSvc = inject(ChatService);
   private router = inject(Router);
 
   user: Signal<UserProfile | null> = toSignal(this.auth.currentUser$, {
     initialValue: null,
   });
+
+  currentUrl = signal(this.router.url);
+  private readonly PUBLIC = ['/login', '/register', '/boarding'];
+  isPublicPage = computed(() =>
+    this.PUBLIC.some((p) => this.currentUrl().startsWith(p))
+  );
+  pageBg = computed(() => {
+    const u = this.user();
+    const pub = this.isPublicPage();
+    if (!u && pub) return 'bg-gray-300';
+    if (!u && !pub) return 'bg-gray-50';
+    return '';
+  });
+
+  private myChats$ = this.auth.currentUser$.pipe(
+    filter((u): u is UserProfile => u !== null),
+    switchMap((u) => this.chatSvc.listenChatsForUser(u.uid))
+  );
+  chats: Signal<ChatPreview[]> = toSignal(this.myChats$, { initialValue: [] });
+
+  unreadCount = computed(() => {
+    // TODO: replace with real comparison
+    // return this.chats().filter(c => c.lastMessageAt > c.yourLastReadAt).length;
+    return 0;
+  });
+
+  constructor() {
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        this.currentUrl.set(e.urlAfterRedirects);
+      });
+  }
 
   logout() {
     this.auth.logout();
@@ -44,27 +89,7 @@ export class HeaderComponent {
     this.auth.deleteAccount();
   }
 
-  currentUrl = signal(this.router.url);
-
-  private readonly PUBLIC = ['/login', '/register', '/onboarding'];
-  isPublicPage = computed(() => {
-    const url = this.currentUrl();
-    return this.PUBLIC.some((p) => url.startsWith(p));
-  });
-
-  pageBg = computed(() => {
-    const u = this.user();
-    const pub = this.isPublicPage();
-    if (!u && pub) return 'bg-gray-300';
-    if (!u && !pub) return 'bg-gray-50';
-    return '';
-  });
-
-  constructor() {
-    this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe((e: NavigationEnd) => {
-        this.currentUrl.set(e.urlAfterRedirects);
-      });
+  onToggleChats() {
+    this.toggleChats.emit();
   }
 }

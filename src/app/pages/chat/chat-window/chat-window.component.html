@@ -1,34 +1,58 @@
 <div class="flex flex-col h-full">
-  <div class="flex-1 overflow-auto p-4 space-y-2">
+  <div
+    class="flex-1 sm:max-h-[calc(100dvh-155px)] overflow-y-auto p-4 space-y-2 bg-slate-100"
+  >
     @for (m of messages(); track m.id) {
     <div
-      class="p-2 rounded shadow-sm"
-      [class.self-end]="m.senderUID === currentUserId()"
+      [class]="
+        'flex w-full  ' +
+        (m.senderUID === currentUserId() ? 'justify-end' : 'justify-start')
+      "
     >
-      <div class="text-sm font-medium">{{ m.senderName }}</div>
-      <div>{{ m.content }}</div>
-      <div class="text-xs text-gray-400">
-        {{ m.createdAt?.toDate() | date : "shortTime" }}
+      <div
+        class="p-2 rounded shadow-sm max-w-[80%] text-bold"
+        [class.bg-blue-500]="m.senderUID === currentUserId()"
+        [class.text-white]="m.senderUID === currentUserId()"
+        [class.bg-gray-200]="m.senderUID !== currentUserId()"
+      >
+        <div
+          [class.text-white]="m.senderUID === currentUserId()"
+          class="text-xs text-gray-800"
+        >
+          {{ m.senderUID === currentUserId() ? "You" : m.senderName }}
+        </div>
+        <div class="mt-1 break-words max-w-96">{{ m.content }}</div>
+        <div
+          [class.text-white]="m.senderUID === currentUserId()"
+          class="text-xs text-gray-500 mt-1"
+        >
+          {{ m.createdAt?.toDate() | date : "shortTime" }}
+        </div>
       </div>
     </div>
     } @empty {
-    <p class="text-center text-gray-500">No messages yet.</p>
+    <p class="text-center mt-10 text-gray-500">No messages yet.</p>
     }
   </div>
 
-  <form (ngSubmit)="send()" class="p-4 border-t flex space-x-2">
+  <form
+    [formGroup]="form"
+    (ngSubmit)="send()"
+    class="p-4 border-t flex space-x-2 bg-gray-400"
+  >
     <textarea
       formControlName="content"
-      class="flex-1 border rounded p-2 resize-none"
+      (keydown)="handleEnter($event)"
+      class="flex-1 border rounded p-2 resize-none bg-gray-50"
       rows="2"
       placeholder="Type your message…"
     ></textarea>
     <button
       type="submit"
-      class="px-4 rounded bg-blue-600 text-white disabled:opacity-50"
+      class="flex justify-center cursor-pointer items-center px-5 rounded-full bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       [disabled]="form.invalid"
     >
-      Send
+      <mat-icon>send</mat-icon>
     </button>
   </form>
 </div>

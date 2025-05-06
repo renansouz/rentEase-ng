@@ -1,16 +1,26 @@
-<ul class="divide-y">
-  @for(c of enriched(); track c.chatId) {
+<ul class="divide-y sm:max-h-[calc(100dvh-155px)]">
+  @if (chats.length === 0) {
+  <li class="p-3 text-center text-gray-500">No conversations yet.</li>
+  } @for (c of chats; track c.chatId) { @let flat = flats()[c.flatId]; @if
+  (flat) {
   <li
-    class="p-3 flex items-center hover:bg-gray-100 cursor-pointer"
-    (click)="goTo(c)"
+    [routerLink]="['/chat', c.chatId]"
+    routerLinkActive="bg-gray-300 hover:bg-gray-300"
+    class="p-3 flex items-center cursor-pointer hover:bg-gray-200"
   >
-    <img [src]="c.photoUrl" class="w-12 h-12 object-cover rounded mr-3" />
-    <div>
-      <div class="font-medium">{{ c.title }}</div>
-      <div class="text-sm text-gray-500">
+    <img
+      [src]="flat.photoUrl || 'fallback.png'"
+      alt="Flat thumbnail"
+      class="w-12 h-12 object-cover rounded mr-3"
+    />
+    <div class="flex-1 min-w-0">
+      <div class="font-medium truncate">
+        {{ flat.streetNumber + ", " + flat.streetName + ", " + flat.city }}
+      </div>
+      <div class="text-sm text-gray-500 truncate">
         Last: {{ c.lastMessageAt?.toDate() | date : "short" }}
       </div>
     </div>
   </li>
-  }
+  } }
 </ul>

@@ -1,12 +1,12 @@
-import { Component, inject, Signal, computed } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { ChatService, ChatPreview } from '../../../services/chat.service';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { ChatPreview } from '../../../services/chat.service';
 import { Flat, FlatService } from '../../../services/flat.service';
-import { AuthService } from '../../../services/auth.service';
-import { filter, switchMap } from 'rxjs';
+import { map } from 'rxjs';
 
 interface EnrichedPreview extends ChatPreview {
   photoUrl: string;
@@ -15,49 +15,23 @@ interface EnrichedPreview extends ChatPreview {
 
 @Component({
   selector: 'app-chat-list',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './chat-list.component.html',
   styleUrl: './chat-list.component.css',
 })
 export class ChatListComponent {
-  private chatSvc = inject(ChatService);
+  @Input() chats: ChatPreview[] = [];
+  @Output() chatClicked = new EventEmitter<string>();
+
   private flatSvc = inject(FlatService);
-  private auth = inject(AuthService);
-  private router = inject(Router);
-
-  chats: Signal<ChatPreview[]> = toSignal(
-    this.auth.currentUser$.pipe(
-      filter((u) => !!u),
-      switchMap((u) => this.chatSvc.listenChatsForUser(u!.uid))
-    ),
-    { initialValue: [] }
+  flats = toSignal(
+    this.flatSvc
+      .getAllFlats()
+      .pipe(map((arr) => Object.fromEntries(arr.map((f) => [f.id, f])))),
+    { initialValue: {} as Record<string, Flat & { id: string }> }
   );
 
-  allFlats: Signal<Flat[]> = toSignal(this.flatSvc.getAllFlats(), {
-    initialValue: [],
-  });
-
-  flatsMap = computed(() => {
-    const map: Record<string, Flat> = {};
-    for (const f of this.allFlats()) {
-      if (!f.id) continue;
-      map[f.id] = f;
-    }
-    return map;
-  });
-
-  enriched: Signal<EnrichedPreview[]> = computed(() =>
-    this.chats().map((c) => {
-      const flat = this.flatsMap()[c.flatId];
-      const photoUrl = flat?.photoUrl ?? 'fallback.png';
-      const title = flat
-        ? `${flat.streetNumber}, ${flat.streetName}`.slice(0, 30) + '…'
-        : 'Unknown';
-      return { ...c, photoUrl, title };
-    })
-  );
-
-  goTo(c: EnrichedPreview) {
-    this.router.navigate(['/chat', c.chatId]);
+  trackByChatId(_idx: number, item: ChatPreview) {
+    return item.chatId;
   }
 }

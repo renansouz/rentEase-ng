@@ -12,22 +12,25 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, switchMap } from 'rxjs/operators';
+import { combineLatest, of } from 'rxjs';
+
 import {
-  DocumentReference,
   Firestore,
   doc,
   docData,
+  DocumentReference,
 } from '@angular/fire/firestore';
-import { filter, map, switchMap, catchError } from 'rxjs/operators';
-import { combineLatest, of } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
-
 import { FlatService, Flat } from '../../../services/flat.service';
-import { MessageService, Message } from '../../../services/message.service';
 import { AuthService, UserProfile } from '../../../services/auth.service';
-import { ChatService, ChatPreview } from '../../../services/chat.service';
+import {
+  ChatService,
+  ChatMessage,
+  ChatPreview,
+} from '../../../services/chat.service';
 
-interface EnrichedMessage extends Message {
+interface EnrichedMessage extends ChatMessage {
   senderName: string;
   senderEmail: string;
 }
@@ -38,12 +41,12 @@ interface EnrichedMessage extends Message {
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
+    MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatListModule,
-    MatProgressSpinnerModule,
     MatDividerModule,
   ],
   templateUrl: './flat-view.component.html',
@@ -52,11 +55,10 @@ interface EnrichedMessage extends Message {
 export class FlatViewComponent {
   private route = inject(ActivatedRoute);
   private flatService = inject(FlatService);
-  private msgService = inject(MessageService);
   private chatService = inject(ChatService);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  public router = inject(Router);
   private db = inject(Firestore);
   private location = inject(Location);
 
@@ -64,25 +66,24 @@ export class FlatViewComponent {
   private flat$ = this.flatService.getFlat(this.flatId);
 
   flatSignal = toSignal(this.flat$, { initialValue: null });
-
   userSignal = toSignal(this.auth.currentUser$, { initialValue: null });
 
   isOwner = computed(() => {
-    const f = this.flatSignal();
-    const u = this.userSignal();
-    return !!f && !!u && f.ownerUID === u.uid;
+    const u = this.userSignal(),
+      f = this.flatSignal();
+    return !!u && !!f && u.uid === f.ownerUID;
   });
 
   ownerSignal = toSignal(
     this.flat$.pipe(
-      filter((f): f is Flat & { id: string } => f !== null),
+      filter((f): f is Flat & { id: string } => !!f),
       switchMap((f) => {
         const ref = doc(
           this.db,
           'users',
           f.ownerUID
         ) as DocumentReference<UserProfile>;
-        return docData<UserProfile>(ref, { idField: 'uid' });
+        return docData(ref, { idField: 'uid' });
       })
     ),
     { initialValue: null }
@@ -93,23 +94,16 @@ export class FlatViewComponent {
   });
 
   private myChats$ = this.auth.currentUser$.pipe(
-    filter((u) => !!u),
-    switchMap((u) => this.chatService.listenChatsForUser(u!.uid))
+    filter((u): u is UserProfile => !!u),
+    switchMap((u) => this.chatService.listenChatsForUser(u.uid))
   );
   chatsSignal = toSignal(this.myChats$, { initialValue: [] as ChatPreview[] });
-
   hasChat = computed(() =>
     this.chatsSignal().some((c) => c.flatId === this.flatId)
   );
-
   chatId = computed(
-    () => this.chatsSignal().find((c) => c.flatId === this.flatId)?.chatId
+    () => this.chatsSignal().find((c) => c.flatId === this.flatId)!.chatId
   );
-
-  readonly defaultMessage = 'Hi, is this available?';
-  msgForm = this.fb.group({
-    content: [this.defaultMessage, Validators.required],
-  });
 
   private ownerMessages$ = combineLatest([
     this.auth.currentUser$.pipe(filter((u): u is UserProfile => !!u)),
@@ -117,75 +111,61 @@ export class FlatViewComponent {
   ]).pipe(
     switchMap(([user, flat]) =>
       user.uid === flat.ownerUID
-        ? this.msgService.getMessages(this.flatId)
-        : of([] as Message[])
+        ? this.chatService.listenMessages(this.chatId()!)
+        : of([] as ChatMessage[])
     )
   );
-
   private enrichedMessages$ = this.ownerMessages$.pipe(
     switchMap((msgs) => {
       if (msgs.length === 0) return of<EnrichedMessage[]>([]);
-      const withProfile$ = msgs.map((msg) => {
-        const ref = doc(
-          this.db,
-          'users',
-          msg.senderUID
-        ) as DocumentReference<UserProfile>;
-        return docData<UserProfile>(ref, { idField: 'uid' }).pipe(
-          filter((u) => !!u),
-          map((u) => ({
-            ...msg,
-            senderName: `${u.firstName} ${u.lastName}`,
-            senderEmail: u.email,
-          })),
-          catchError(() =>
-            of<EnrichedMessage>({
-              ...msg,
-              senderName: 'Unknown',
-              senderEmail: '',
-            })
-          )
-        );
-      });
-      return combineLatest(withProfile$);
+      return combineLatest(
+        msgs.map((msg) => {
+          const ref = doc(
+            this.db,
+            'users',
+            msg.senderUID
+          ) as DocumentReference<UserProfile>;
+          return docData(ref, { idField: 'uid' }).pipe(
+            filter((u): u is UserProfile => !!u),
+            switchMap((u) =>
+              of<EnrichedMessage>({
+                ...msg,
+                senderName: `${u.firstName} ${u.lastName}`,
+                senderEmail: u.email,
+              })
+            )
+          );
+        })
+      );
     })
   );
   messagesSignal: Signal<EnrichedMessage[]> = toSignal(this.enrichedMessages$, {
     initialValue: [],
   });
 
+  readonly defaultMessage = 'Hi, is this available?';
+  msgForm = this.fb.group({
+    content: [this.defaultMessage, Validators.required],
+  });
   sent = false;
 
   async sendMessage() {
-    const content = this.msgForm.value.content?.trim();
-    if (!content) return;
-
+    if (this.msgForm.invalid) return;
+    const content = this.msgForm.value.content!.trim();
     const ownerUID = this.flatSignal()!.ownerUID;
-    const chatId = await this.chatService.getOrCreateChat(
-      this.flatId,
-      ownerUID
-    );
-
-    await this.chatService.sendMessage(chatId, content);
-
+    const id = await this.chatService.getOrCreateChat(this.flatId, ownerUID);
+    await this.chatService.sendMessage(id, content);
     this.sent = true;
   }
 
-  private toDate(ts: any): Date {
-    if (ts instanceof Date) return ts;
-    if (ts?.toDate) return ts.toDate();
-    return new Date(0);
+  goToChat() {
+    const id = this.chatId();
+    if (id) {
+      this.router.navigate(['/chat', id]);
+    } else {
+      console.warn('No chatId found for this flat');
+    }
   }
-  formatDate(ts?: any) {
-    const d = this.toDate(ts);
-    return d
-      ? new Intl.DateTimeFormat('en-US', {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        }).format(d)
-      : '';
-  }
-
   edit() {
     this.router.navigate(['/flats', this.flatId, 'edit']);
   }
@@ -194,5 +174,17 @@ export class FlatViewComponent {
   }
   goBack() {
     this.location.back();
+  }
+
+  private toDate(ts: any): Date {
+    if (ts instanceof Date) return ts;
+    return ts?.toDate?.() ?? new Date(0);
+  }
+  formatDate(ts?: any): string {
+    const d = this.toDate(ts);
+    return new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(d);
   }
 }

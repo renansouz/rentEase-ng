@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -29,6 +29,7 @@ export interface ChatPreview {
   flatId: string;
   otherUID: string;
   lastMessageAt: any;
+  lastReadAt?: any;
 }
 
 export interface ChatMessage {
@@ -50,18 +51,19 @@ export class ChatService {
     if (!me) throw new Error('Not authenticated');
 
     const chatsCol = collection(this.firestore, 'chats');
+
     const q = query(
       chatsCol,
       where('flatId', '==', flatId),
-      where('participantsUIDs', 'array-contains-any', [me])
+      where('participantsUIDs', 'in', [
+        [me, otherUID],
+        [otherUID, me],
+      ])
     );
     const existing = await firstValueFrom(
       collectionData(q, { idField: 'id' }) as Observable<Chat[]>
     );
-    const found = existing.find(
-      (c) =>
-        c.participantsUIDs.includes(me) && c.participantsUIDs.includes(otherUID)
-    );
+    const found = existing[0];
     if (found) return found.id;
 
     const chatRef = await addDoc(chatsCol, {
@@ -88,6 +90,7 @@ export class ChatService {
       where('participantsUIDs', 'array-contains', uid),
       orderBy('lastMessageAt', 'desc')
     );
+
     return collectionData(q, { idField: 'id' }).pipe(
       map((docs: any[]) =>
         docs.map(
@@ -116,8 +119,8 @@ export class ChatService {
     const msgsCol = collection(this.firestore, `chats/${chatId}/messages`);
     await addDoc(msgsCol, {
       senderUID: user.uid,
-      senderName: `${user.firstName} ${user.lastName}`,
-      senderEmail: user.email,
+      senderName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      senderEmail: user.email || '',
       content,
       createdAt: serverTimestamp(),
     });

@@ -82,12 +82,12 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
   },
   {
-    path: 'chats',
+    path: 'chat',
     component: ChatPageComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', component: ChatListComponent }, // if you go to /chats
-      { path: ':chatId', component: ChatWindowComponent }, // deep-link to a specific chat
+      { path: '', component: ChatListComponent },
+      { path: ':chatId', component: ChatWindowComponent },
     ],
   },
 

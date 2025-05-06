@@ -113,7 +113,7 @@ export class NewFlatComponent {
     const user = this.userSignal();
     if (!user) return;
 
-    const payload: Omit<Flat, 'createdAt'> = {
+    const payload: Omit<Flat, 'id' | 'createdAt'> = {
       ownerUID: user.uid,
       city: this.f['city'].value,
       streetName: this.f['streetName'].value,

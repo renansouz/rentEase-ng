@@ -1,19 +1,20 @@
 <div class="p-4 max-w-3xl mx-auto">
-  @if(!flatSignal()) {
+  @if (!flatSignal()) {
   <div class="flex justify-center py-16">
     <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
   </div>
   } @else {
   <button
     mat-icon-button
-    class="absolute top-0 !mb-2 left-0 !bg-gray-100 !flex !justify-center rounded-full cursor-pointer"
+    class="absolute top-0 left-0 bg-gray-100 rounded-full"
     aria-label="Go back"
     (click)="goBack()"
   >
     <mat-icon>arrow_back</mat-icon>
   </button>
+
   <mat-card class="space-y-4 relative p-10">
-    @if(flatSignal()!.photoUrl) {
+    @if (flatSignal()!.photoUrl) {
     <img
       [src]="flatSignal()!.photoUrl"
       alt="Flat photo"
@@ -38,7 +39,7 @@
 
     <p class="text-gray-500">
       Owner:
-      <button mat-button class="!text-red-700" (click)="viewOwnerProfile()">
+      <button mat-button class="text-red-700" (click)="viewOwnerProfile()">
         {{ ownerName() || flatSignal()!.ownerUID }}
       </button>
     </p>
@@ -46,7 +47,7 @@
     @if (isOwner()) {
     <button
       mat-flat-button
-      class="!bg-red-600 !text-white mx-auto !rounded-lg w-fit"
+      class="bg-red-600 text-white mx-auto rounded-lg"
       (click)="edit()"
     >
       <mat-icon>edit</mat-icon> Edit Flat
@@ -71,10 +72,14 @@
       </mat-list-item>
       }
     </mat-list>
-    } } @else { @if (sent) {
-    <div class="text-center text-green-600 py-4">
-      Your message has been sent! Please wait for a reply.
-    </div>
+    } } @else { @if (hasChat()) {
+    <button
+      class="bg-red-600 flex cursor-pointer justify-center gap-2 !text-sm p-3 font-medium text-white mx-auto rounded-lg"
+      (click)="goToChat()"
+    >
+      Open chat
+      <mat-icon>message</mat-icon>
+    </button>
     } @else {
     <form [formGroup]="msgForm" (ngSubmit)="sendMessage()" class="space-y-2">
       <mat-form-field class="w-full">
@@ -83,13 +88,16 @@
       </mat-form-field>
       <button
         mat-flat-button
-        color="accent"
-        class="disabled:cursor-not-allowed !bg-red-600 !text-white mx-auto !rounded-lg w-fit"
+        class="bg-red-600 text-white mx-auto rounded-lg"
         [disabled]="sent || msgForm.invalid"
       >
         <mat-icon>send</mat-icon> Send
       </button>
     </form>
+    } @if (sent) {
+    <div class="text-center text-green-700 py-4">
+      Your message has been sent! Please wait for a reply.
+    </div>
     } }
   </mat-card>
   }

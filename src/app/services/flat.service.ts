@@ -34,7 +34,7 @@ export class FlatService {
   private firestore = inject(Firestore);
   private flatsCollectionRef = collection(this.firestore, 'flats');
 
-  async createFlat(flat: Omit<Flat, 'createdAt'>): Promise<string> {
+  async createFlat(flat: Omit<Flat, 'id' | 'createdAt'>): Promise<string> {
     const docRef = await addDoc(this.flatsCollectionRef, {
       ...flat,
       createdAt: serverTimestamp(),

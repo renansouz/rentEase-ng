@@ -67,11 +67,14 @@ export class HeaderComponent {
   );
   chats: Signal<ChatPreview[]> = toSignal(this.myChats$, { initialValue: [] });
 
-  unreadCount = computed(() => {
-    // TODO: replace with real comparison
-    // return this.chats().filter(c => c.lastMessageAt > c.yourLastReadAt).length;
-    return 0;
-  });
+  unreadCount = computed(
+    () =>
+      this.chats().filter(
+        (c) =>
+          c.lastReadAt == null ||
+          c.lastMessageAt.toMillis() > c.lastReadAt.toMillis()
+      ).length
+  );
 
   constructor() {
     this.router.events

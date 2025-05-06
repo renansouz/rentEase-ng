@@ -25,7 +25,9 @@
     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-6"
   >
     @if (flatsSignal()?.length === 0) {
-    <p class="text-gray-600 pt-20">You haven't added any flats yet.</p>
+    <p class="text-gray-600 pt-20 text-center">
+      You haven't added any flats yet.
+    </p>
     } @else { @for (flat of flatsSignal(); track flat.id) {
     <mat-card
       class="min-w-74 w-full cursor-pointer"

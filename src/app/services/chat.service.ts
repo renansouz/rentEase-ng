@@ -11,10 +11,11 @@ import {
   setDoc,
   updateDoc,
   serverTimestamp,
+  docData,
 } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { firstValueFrom, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 export interface Chat {
   id: string;
@@ -29,7 +30,8 @@ export interface ChatPreview {
   flatId: string;
   otherUID: string;
   lastMessageAt: any;
-  lastReadAt?: any;
+  lastReadAt: any;
+  unreadMessagesCount: number;
 }
 
 export interface ChatMessage {
@@ -51,7 +53,6 @@ export class ChatService {
     if (!me) throw new Error('Not authenticated');
 
     const chatsCol = collection(this.firestore, 'chats');
-
     const q = query(
       chatsCol,
       where('flatId', '==', flatId),
@@ -63,8 +64,7 @@ export class ChatService {
     const existing = await firstValueFrom(
       collectionData(q, { idField: 'id' }) as Observable<Chat[]>
     );
-    const found = existing[0];
-    if (found) return found.id;
+    if (existing[0]) return existing[0].id;
 
     const chatRef = await addDoc(chatsCol, {
       flatId,
@@ -85,24 +85,60 @@ export class ChatService {
 
   listenChatsForUser(uid: string): Observable<ChatPreview[]> {
     const chatsCol = collection(this.firestore, 'chats');
-    const q = query(
+    const chatsQ = query(
       chatsCol,
       where('participantsUIDs', 'array-contains', uid),
       orderBy('lastMessageAt', 'desc')
     );
 
-    return collectionData(q, { idField: 'id' }).pipe(
-      map((docs: any[]) =>
-        docs.map(
-          (d) =>
-            ({
-              chatId: d.id,
-              flatId: d.flatId,
-              otherUID: d.participantsUIDs.find((p: string) => p !== uid),
-              lastMessageAt: d.lastMessageAt,
-            } as ChatPreview)
-        )
-      )
+    return collectionData(chatsQ, { idField: 'id' }).pipe(
+      switchMap((chats: any[]) => {
+        const streams = chats.map((chat) => {
+          const chatId = chat.id as string;
+          const flatId = chat.flatId as string;
+          const otherUID = (chat.participantsUIDs as string[]).find(
+            (p) => p !== uid
+          )!;
+          const lastMsgAt = chat.lastMessageAt;
+
+          const partDoc = doc(
+            this.firestore,
+            `chats/${chatId}/participants/${uid}`
+          );
+          const lastRead$ = docData(partDoc).pipe(
+            map((p: any | undefined) => p?.lastReadAt ?? null),
+            catchError(() => [null])
+          );
+
+          const msgsCol = collection(
+            this.firestore,
+            `chats/${chatId}/messages`
+          );
+
+          return lastRead$.pipe(
+            switchMap((lastReadAt) => {
+              const msgsQ = lastReadAt
+                ? query(msgsCol, where('createdAt', '>', lastReadAt))
+                : query(msgsCol, orderBy('createdAt'));
+              return collectionData(msgsQ).pipe(
+                map(
+                  (msgs: any[]) =>
+                    ({
+                      chatId,
+                      flatId,
+                      otherUID,
+                      lastMessageAt: lastMsgAt,
+                      lastReadAt,
+                      unreadMessagesCount: msgs.length,
+                    } as ChatPreview)
+                )
+              );
+            })
+          );
+        });
+
+        return combineLatest(streams);
+      })
     );
   }
 
@@ -119,8 +155,8 @@ export class ChatService {
     const msgsCol = collection(this.firestore, `chats/${chatId}/messages`);
     await addDoc(msgsCol, {
       senderUID: user.uid,
-      senderName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-      senderEmail: user.email || '',
+      senderName: `${user.firstName} ${user.lastName}`.trim(),
+      senderEmail: user.email ?? '',
       content,
       createdAt: serverTimestamp(),
     });
@@ -128,19 +164,17 @@ export class ChatService {
     await updateDoc(doc(this.firestore, 'chats', chatId), {
       lastMessageAt: serverTimestamp(),
     });
-
-    await updateDoc(
-      doc(this.firestore, `chats/${chatId}/participants`, user.uid),
-      { lastReadAt: serverTimestamp() }
-    );
   }
 
   async markAsRead(chatId: string): Promise<void> {
     const user = await firstValueFrom(this.auth.currentUser$);
     if (!user) return;
-    await updateDoc(
-      doc(this.firestore, `chats/${chatId}/participants`, user.uid),
-      { lastReadAt: serverTimestamp() }
+    const partDoc = doc(
+      this.firestore,
+      `chats/${chatId}/participants/${user.uid}`
     );
+    try {
+      await updateDoc(partDoc, { lastReadAt: serverTimestamp() });
+    } catch {}
   }
 }

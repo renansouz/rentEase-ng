@@ -1,15 +1,19 @@
 @if(user()) {
-<mat-card class="relative max-w-md mx-auto mt-12 p-10 pt-20">
+<mat-card class="relative max-w-lg mx-auto mt-12 p-10 pt-20">
   <button
     mat-icon-button
-    class="absolute top-4 left-4 bg-gray-300 p-2 flex rounded-full cursor-pointer"
+    class="absolute top-4 left-4 hover:bg-gray-200 p-1 flex rounded-full cursor-pointer"
     aria-label="Go back"
     (click)="goBack()"
   >
     <mat-icon>arrow_back</mat-icon>
   </button>
 
-  <h2 class="text-2xl font-semibold mb-4">
+  <h2 class="text-2xl font-semibold mb-4 flex items-center gap-3">
+    <mat-icon
+      class="flex justify-center items-end bg-gray-900 !text-gray-50 rounded-full !w-18 !text-7xl !h-18"
+      >person</mat-icon
+    >
     {{ user()!.firstName }} {{ user()!.lastName }}
   </h2>
 

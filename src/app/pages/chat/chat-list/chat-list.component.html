@@ -1,12 +1,12 @@
-<ul class="divide-y sm:max-h-[calc(100dvh-155px)]">
+<ul class="divide-y sm:max-h-[calc(100dvh-155px)] px-1">
   @if (chats.length === 0) {
-  <li class="p-3 text-center text-gray-500">No conversations yet.</li>
+  <li class="p-3 text-center mt-[10%] text-gray-500">No conversations yet.</li>
   } @for (c of chats; track c.chatId) { @let flat = flats()[c.flatId]; @if
   (flat) {
   <li
     [routerLink]="['/chat', c.chatId]"
-    routerLinkActive="bg-gray-300 hover:bg-gray-300"
-    class="p-3 flex items-center cursor-pointer hover:bg-gray-200"
+    routerLinkActive="bg-gray-300 hover:!bg-gray-300"
+    class="p-3 flex items-center cursor-pointer hover:bg-gray-400/20 border-none rounded-xl"
   >
     <img
       [src]="flat.photoUrl || 'fallback.png'"

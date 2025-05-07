@@ -13,8 +13,11 @@ import {
   collectionData,
   CollectionReference,
   doc,
-  deleteDoc,
   updateDoc,
+  query,
+  writeBatch,
+  where,
+  getDocs,
 } from '@angular/fire/firestore';
 import { FormBuilder, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,6 +27,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIcon } from '@angular/material/icon';
 
 import { Router } from '@angular/router';
 import { AuthService, UserProfile } from '../../../services/auth.service';
@@ -41,12 +47,15 @@ const INCREMENT = 10;
     MatInputModule,
     MatButtonModule,
     MatTableModule,
+    MatSnackBarModule,
+    MatIcon,
   ],
   templateUrl: './all-users.component.html',
   styleUrl: './all-users.component.css',
 })
 export class AllUsersComponent {
   private db = inject(Firestore);
+  private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private flatService = inject(FlatService);
@@ -117,16 +126,39 @@ export class AllUsersComponent {
 
     return filtered.sort((a, b) => {
       const key = f.sortBy as keyof typeof a;
-      return a[key]! < b[key]! ? -1 : a[key]! > b[key]! ? 1 : 0;
+      return a[key]! > b[key]! ? -1 : a[key]! < b[key]! ? 1 : 0;
     });
   });
 
   async grantAdmin(user: UserProfile) {
     await updateDoc(doc(this.db, 'users', user.uid), { isAdmin: true });
+    this.snackBar.open(
+      `${user.firstName} ${user.lastName} is now an admin.`,
+      'Close',
+      { duration: 3000 }
+    );
   }
 
   async removeUser(user: UserProfile) {
-    await deleteDoc(doc(this.db, 'users', user.uid));
+    const batch = writeBatch(this.db);
+
+    const flatsCol = collection(this.db, 'flats');
+    const q = query(flatsCol, where('ownerUID', '==', user.uid));
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach((flatDoc) => {
+      batch.delete(flatDoc.ref);
+    });
+
+    batch.delete(doc(this.db, 'users', user.uid));
+
+    await batch.commit();
+
+    this.snackBar.open(
+      `Deleted ${user.firstName} ${user.lastName} and their ${snapshot.size} flats.`,
+      'Close',
+      { duration: 3000 }
+    );
   }
 
   viewUserProfile(uid: string) {
@@ -159,5 +191,69 @@ export class AllUsersComponent {
       'profile',
       'actions',
     ];
+  }
+
+  async onCleanDatabase() {
+    if (!confirm('Really delete orphan flats, users & empty chats?')) return;
+
+    const batch = writeBatch(this.db);
+
+    const [usersSnap, flatsSnap, chatsSnap] = await Promise.all([
+      getDocs(collection(this.db, 'users')),
+      getDocs(collection(this.db, 'flats')),
+      getDocs(collection(this.db, 'chats')),
+    ]);
+
+    const allUserIds = new Set(usersSnap.docs.map((d) => d.id));
+    const allFlatIds = new Set(flatsSnap.docs.map((d) => d.id));
+
+    const ownerCounts = new Map<string, number>();
+    flatsSnap.docs.forEach((f) => {
+      const owner = f.data()['ownerUID'] as string;
+      ownerCounts.set(owner, (ownerCounts.get(owner) || 0) + 1);
+    });
+
+    let flatsDeleted = 0;
+    let usersDeleted = 0;
+    let chatsDeleted = 0;
+
+    flatsSnap.docs.forEach((f) => {
+      const owner = f.data()['ownerUID'] as string;
+      if (!allUserIds.has(owner)) {
+        batch.delete(f.ref);
+        flatsDeleted++;
+      }
+    });
+
+    usersSnap.docs.forEach((u) => {
+      if ((ownerCounts.get(u.id) || 0) === 0) {
+        batch.delete(u.ref);
+        usersDeleted++;
+      }
+    });
+
+    for (const c of chatsSnap.docs) {
+      const chatData = c.data() as { flatId: string };
+      if (!allFlatIds.has(chatData.flatId)) {
+        batch.delete(c.ref);
+        chatsDeleted++;
+        continue;
+      }
+      const msgsSnap = await getDocs(
+        collection(this.db, `chats/${c.id}/messages`)
+      );
+      if (msgsSnap.empty) {
+        batch.delete(c.ref);
+        chatsDeleted++;
+      }
+    }
+
+    await batch.commit();
+
+    this.snackBar.open(
+      `Removed ${flatsDeleted} flats, ${usersDeleted} users, ${chatsDeleted} chats.`,
+      'OK',
+      { duration: 5000 }
+    );
   }
 }

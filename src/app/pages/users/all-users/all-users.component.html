@@ -48,6 +48,15 @@
       <mat-option value="flatsCount">Flats Count</mat-option>
     </mat-select>
   </mat-form-field>
+
+  <div class="p-4 flex justify-start items-center">
+    <button
+      (click)="onCleanDatabase()"
+      class="flex gap-2 justify-center items-center bg-red-800 cursor-pointer text-white font-bold p-2 rounded-lg"
+    >
+      <mat-icon class="!text-yellow-500">warning</mat-icon>Clean Database
+    </button>
+  </div>
 </form>
 <div class="overflow-x-auto">
   <table mat-table [dataSource]="limitedUsers()">

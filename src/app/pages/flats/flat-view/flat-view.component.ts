@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, switchMap } from 'rxjs/operators';
@@ -48,6 +49,7 @@ interface EnrichedMessage extends ChatMessage {
     MatIconModule,
     MatListModule,
     MatDividerModule,
+    MatSnackBarModule,
   ],
   templateUrl: './flat-view.component.html',
   styleUrl: './flat-view.component.css',
@@ -61,6 +63,7 @@ export class FlatViewComponent {
   public router = inject(Router);
   private db = inject(Firestore);
   private location = inject(Location);
+  private snackBar = inject(MatSnackBar);
 
   private flatId = this.route.snapshot.paramMap.get('id')!;
   private flat$ = this.flatService.getFlat(this.flatId);
@@ -98,12 +101,16 @@ export class FlatViewComponent {
     switchMap((u) => this.chatService.listenChatsForUser(u.uid))
   );
   chatsSignal = toSignal(this.myChats$, { initialValue: [] as ChatPreview[] });
-  hasChat = computed(() =>
-    this.chatsSignal().some((c) => c.flatId === this.flatId)
-  );
-  chatId = computed(
-    () => this.chatsSignal().find((c) => c.flatId === this.flatId)!.chatId
-  );
+
+  hasChat = computed(() => {
+    const chats = this.chatsSignal() ?? [];
+    return chats.some((c) => c.flatId === this.flatId);
+  });
+
+  chatId = computed(() => {
+    const chats = this.chatsSignal() ?? [];
+    return chats.find((c) => c.flatId === this.flatId)?.chatId ?? null;
+  });
 
   private ownerMessages$ = combineLatest([
     this.auth.currentUser$.pipe(filter((u): u is UserProfile => !!u)),
@@ -156,16 +163,20 @@ export class FlatViewComponent {
     const id = await this.chatService.getOrCreateChat(this.flatId, ownerUID);
     await this.chatService.sendMessage(id, content);
     this.sent = true;
+
+    this.snackBar.open('Your message has been sent!', 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['bg-green-600', 'text-white'],
+    });
   }
 
   goToChat() {
     const id = this.chatId();
-    if (id) {
-      this.router.navigate(['/chat', id]);
-    } else {
-      console.warn('No chatId found for this flat');
-    }
+    if (id) this.router.navigate(['/chat', id]);
   }
+
   edit() {
     this.router.navigate(['/flats', this.flatId, 'edit']);
   }

@@ -1,6 +1,7 @@
 <div class="flex flex-col h-full">
   <div
-    class="flex-1 sm:max-h-[calc(100dvh-155px)] overflow-y-auto p-4 space-y-2 bg-slate-100"
+    #scrollContainer
+    class="flex-1 sm:max-h-100dvh overflow-y-auto p-4 space-y-2 bg-white"
   >
     @for (m of messages(); track m.id) {
     <div
@@ -10,21 +11,23 @@
       "
     >
       <div
-        class="p-2 rounded shadow-sm max-w-[80%] text-bold"
-        [class.bg-blue-500]="m.senderUID === currentUserId()"
+        class="p-2 rounded shadow-sm min-w-30 max-w-[80%] text-bold"
+        [class.bg-red-600]="m.senderUID === currentUserId()"
         [class.text-white]="m.senderUID === currentUserId()"
         [class.bg-gray-200]="m.senderUID !== currentUserId()"
       >
         <div
           [class.text-white]="m.senderUID === currentUserId()"
-          class="text-xs text-gray-800"
+          class="text-xs text-gray-800 font-light"
         >
           {{ m.senderUID === currentUserId() ? "You" : m.senderName }}
         </div>
-        <div class="mt-1 break-words max-w-96">{{ m.content }}</div>
+        <div class="mt-1 break-words max-w-96 font-semibold">
+          {{ m.content }}
+        </div>
         <div
           [class.text-white]="m.senderUID === currentUserId()"
-          class="text-xs text-gray-500 mt-1"
+          class="text-xs text-gray-500 mt-1 font-light"
         >
           {{ m.createdAt?.toDate() | date : "shortTime" }}
         </div>
@@ -38,18 +41,18 @@
   <form
     [formGroup]="form"
     (ngSubmit)="send()"
-    class="p-4 border-t flex space-x-2 bg-gray-400"
+    class="p-2 flex space-x-2 bg-gray-300"
   >
     <textarea
       formControlName="content"
       (keydown)="handleEnter($event)"
-      class="flex-1 border rounded p-2 resize-none bg-gray-50"
+      class="flex-1 rounded focus:!border-none p-2 bg-gray-300"
       rows="2"
       placeholder="Type your message…"
     ></textarea>
     <button
       type="submit"
-      class="flex justify-center cursor-pointer items-center px-5 rounded-full bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      class="flex justify-center cursor-pointer items-center px-5 rounded-full text-red-600 hover:bg-gray-400/20 disabled:bg-none disabled:opacity-70 disabled:cursor-not-allowed"
       [disabled]="form.invalid"
     >
       <mat-icon>send</mat-icon>

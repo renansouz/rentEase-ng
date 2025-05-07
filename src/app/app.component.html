@@ -5,14 +5,14 @@
 } @else { @if(showHeader() ) {
 <app-header></app-header>} }
 
-<div class="flex">
+<div class="flex !overflow-y-hidden">
   <div
     [class]="
       user()
-        ? 'sm:mt-[48px] sm:min-h-[calc(100dvh-56px)]'
-        : 'sm:min-h-[calc(100dvh-76px)]'
+        ? 'sm:mt-[56px] sm:h-[calc(100dvh-56px)]'
+        : 'sm:h-[calc(100dvh-76px)]'
     "
-    class="flex-1 bg-gray-300 py-4 min-h-[calc(100dvh-148px)]"
+    class="flex-1 overflow-y-auto bg-gray-300 py-4 h-[calc(100dvh-148px)]"
   >
     <router-outlet></router-outlet>
   </div>

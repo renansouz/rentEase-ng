@@ -88,16 +88,12 @@
       </mat-form-field>
       <button
         mat-flat-button
-        class="bg-red-600 text-white mx-auto rounded-lg"
+        class="!bg-red-600 text-white mx-auto rounded-lg"
         [disabled]="sent || msgForm.invalid"
       >
         <mat-icon>send</mat-icon> Send
       </button>
     </form>
-    } @if (sent) {
-    <div class="text-center text-green-700 py-4">
-      Your message has been sent! Please wait for a reply.
-    </div>
     } }
   </mat-card>
   }

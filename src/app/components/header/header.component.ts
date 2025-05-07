@@ -61,19 +61,19 @@ export class HeaderComponent {
     return '';
   });
 
-  private myChats$ = this.auth.currentUser$.pipe(
-    filter((u): u is UserProfile => u !== null),
+  private chats$ = this.auth.currentUser$.pipe(
+    filter((u): u is UserProfile => !!u),
     switchMap((u) => this.chatSvc.listenChatsForUser(u.uid))
   );
-  chats: Signal<ChatPreview[]> = toSignal(this.myChats$, { initialValue: [] });
+  chats: Signal<ChatPreview[]> = toSignal(this.chats$, { initialValue: [] });
 
   unreadCount = computed(
     () =>
-      this.chats().filter(
-        (c) =>
-          c.lastReadAt == null ||
-          c.lastMessageAt.toMillis() > c.lastReadAt.toMillis()
-      ).length
+      this.chats().filter((c) => {
+        if (!c.lastMessageAt) return false;
+        if (c.lastReadAt == null) return true;
+        return c.lastMessageAt.toMillis() > c.lastReadAt.toMillis();
+      }).length
   );
 
   constructor() {

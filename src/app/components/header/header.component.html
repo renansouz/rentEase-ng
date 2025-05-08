@@ -1,22 +1,13 @@
-<header
-  [ngClass]="pageBg()"
-  [class]="
-    user()
-      ? 'bg-gray-900 sm:fixed sm:z-10 sm:w-full text-white shadow p-2 flex max-sm:flex-col max-sm:space-y-2 items-center justify-between'
-      : 'max-h-[76px]  text-white shadow-none p-4 flex items-center justify-between'
-  "
->
+<header [ngClass]="headerClasses()">
   @if (user()) {
   <div class="flex items-center space-x-4">
     <a routerLink="/" class="flex items-center max-md:hidden">
       <img src="rentease-logo.png" alt="RentEase" class="h-8" />
     </a>
     <span class="text-sm inline-block max-w-[12ch] truncate">
-      Hi,
-      <span class="font-medium">{{ user()?.firstName }}</span
-      >!
+      Hi, <span class="font-medium">{{ user()?.firstName }}</span
+      >! 👋
     </span>
-    👋
   </div>
 
   <nav class="flex space-x-2 max-md:text-sm">
@@ -25,42 +16,38 @@
       routerLinkActive="!font-extrabold"
       [routerLinkActiveOptions]="{ exact: true }"
       class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+      >Home</a
     >
-      Home
-    </a>
     <a
       routerLink="/my-flats"
       routerLinkActive="!font-extrabold"
       class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+      >My Flats</a
     >
-      My Flats
-    </a>
     <a
       routerLink="/favorites"
       routerLinkActive="!font-extrabold"
       class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+      >Favorites</a
     >
-      Favorites
-    </a>
     @if (user()?.isAdmin) {
     <a
       routerLink="/users"
       routerLinkActive="!font-extrabold"
       class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+      >All Users</a
     >
-      All Users
-    </a>
     }
   </nav>
 
   <div class="flex items-center space-x-4 max-md:text-sm">
     <button
       mat-icon-button
-      class="relative !text-gray-200 hover:!bg-gray-300/10"
       [routerLink]="['/chat']"
+      class="relative !text-gray-200 hover:bg-gray-300/10"
     >
       <mat-icon>chat</mat-icon>
-      @if(unreadCount() > 0) {
+      @if (unreadCount() > 0) {
       <span
         class="absolute top-0 right-0 z-50 inline-flex items-center justify-center px-1.5 text-xs font-semibold text-white bg-red-600 rounded-full"
       >
@@ -71,30 +58,25 @@
 
     <button
       [matMenuTriggerFor]="profileMenu"
-      class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10 flex items-center space-x-2 cursor-pointer"
+      class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10 flex items-center space-x-2"
     >
-      Profile
-      <mat-icon>keyboard_arrow_down</mat-icon>
+      Profile <mat-icon>keyboard_arrow_down</mat-icon>
     </button>
-
     <mat-menu #profileMenu="matMenu">
       <button routerLink="/profile" mat-menu-item>
-        <mat-icon>person</mat-icon>
-        <P>My Profile</P>
+        <mat-icon>person</mat-icon>My Profile
       </button>
       <button mat-menu-item (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Logout</span>
+        <mat-icon>logout</mat-icon>Logout
       </button>
       <button mat-menu-item (click)="deleteAccount()">
-        <mat-icon>delete</mat-icon>
-        <span>Delete Account</span>
+        <mat-icon>delete</mat-icon>Delete Account
       </button>
     </mat-menu>
   </div>
   } @else {
-  <a routerLink="/" class="flex items-center">
-    <img src="rentease-logo-red.png" alt="RentEase" class="h-28" />
-  </a>
+  <a routerLink="/" class="flex items-center"
+    ><img src="rentease-logo-red.png" alt="RentEase" class="h-28"
+  /></a>
   }
 </header>

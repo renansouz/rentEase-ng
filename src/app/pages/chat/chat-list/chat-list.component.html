@@ -1,26 +1,42 @@
 <ul class="divide-y sm:max-h-[calc(100dvh-155px)] px-1">
-  @if (chats.length === 0) {
+  @if (!chats || chats.length === 0) {
   <li class="p-3 text-center mt-[10%] text-gray-500">No conversations yet.</li>
-  } @for (c of chats; track c.chatId) { @let flat = flats()[c.flatId]; @if
-  (flat) {
+  } @for (c of chats; track c.chatId) {
   <li
     [routerLink]="['/chat', c.chatId]"
-    routerLinkActive="bg-gray-300 hover:!bg-gray-300"
-    class="p-3 flex items-center cursor-pointer hover:bg-gray-400/20 border-none rounded-xl"
+    routerLinkActive="bg-gray-300"
+    class="p-3 flex items-center cursor-pointer border-none hover:bg-gray-400/20 rounded-xl"
+    [ngClass]="{
+      'bg-yellow-100': c.unreadMessagesCount > 0
+    }"
+    [routerLinkActiveOptions]="{ exact: true }"
+    trackBy="trackByChatId"
   >
     <img
-      [src]="flat.photoUrl || 'fallback.png'"
+      [src]="flats()[c.flatId].photoUrl || 'fallback.png'"
       alt="Flat thumbnail"
       class="w-12 h-12 object-cover rounded mr-3"
     />
+
     <div class="flex-1 min-w-0">
       <div class="font-medium truncate">
-        {{ flat.streetNumber + ", " + flat.streetName + ", " + flat.city }}
+        {{ flats()[c.flatId].streetNumber }},
+        {{ flats()[c.flatId].streetName }},
+        {{ flats()[c.flatId].city }}
       </div>
-      <div class="text-sm text-gray-500 truncate">
-        Last: {{ c.lastMessageAt?.toDate() | date : "short" }}
+      <div class="text-sm text-gray-500 truncate flex items-center">
+        <span class="flex-1">
+          Last: {{ c.lastMessageAt?.toDate() | date : "short" }}
+        </span>
+        @if (c.unreadMessagesCount > 0) {
+        <span
+          class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full"
+        >
+          {{ c.unreadMessagesCount }}
+        </span>
+        }
       </div>
     </div>
   </li>
-  } }
+  }
 </ul>

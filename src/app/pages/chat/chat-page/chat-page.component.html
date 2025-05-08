@@ -3,9 +3,10 @@
     class="w-80 border-r border-gray-300 shadow-2xl overflow-auto bg-gray-200"
   >
     <h2 class="font-semibold text-xl py-5 pl-2">Chats</h2>
+
     <app-chat-list
       [chats]="(chats$ | async) ?? []"
-      (chatClicked)="onChatSelected($event)"
+      [currentUid]="(uid$ | async) ?? ''"
     ></app-chat-list>
   </aside>
 

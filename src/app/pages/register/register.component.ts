@@ -83,7 +83,10 @@ export class RegisterComponent {
   }
 
   async onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.submitError = 'Please fix the errors in the form.';
+      return;
+    }
     this.submitError = null;
 
     const { firstName, lastName, email, birthDate, password } = this.form
@@ -97,13 +100,32 @@ export class RegisterComponent {
         lastName,
         new Date(birthDate)
       );
-    } catch (err: any) {
-      if (err.code === 'auth/email-already-in-use') {
-        this.submitError = 'This email is already registered.';
-      } else {
-        this.submitError = 'Registration failed. Please try again.';
+    } catch (err: unknown) {
+      console.error('Registration error →', err);
+      this.submitError = this.mapFirebaseError(err);
+    }
+  }
+
+  private mapFirebaseError(err: unknown): string {
+    if (err instanceof FirebaseError) {
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          return 'That email is already registered. Try logging in instead.';
+        case 'auth/invalid-email':
+          return 'The email address is malformed.';
+        case 'auth/weak-password':
+          return 'Password is too weak. Please choose at least 6 characters.';
+        case 'auth/password-does-not-meet-requirements':
+          const match = err.message.match(/\[(.+)\]/);
+          const requirement = match
+            ? match[1]
+            : 'Password does not meet requirements';
+          return requirement;
+        default:
+          return err.message;
       }
     }
+    return 'An unexpected error occurred. Please try again.';
   }
 
   private mapError(err: unknown): string {
@@ -126,10 +148,12 @@ export class RegisterComponent {
   }
 
   async loginWithGoogle() {
+    this.submitError = null;
     try {
       await this.auth.loginWithGoogle();
-    } catch (err) {
-      this.submitError = this.mapError(err);
+    } catch (err: unknown) {
+      console.error('Google login error →', err);
+      this.submitError = this.mapFirebaseError(err);
     }
   }
 }

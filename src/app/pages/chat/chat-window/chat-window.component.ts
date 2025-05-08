@@ -1,46 +1,63 @@
 import {
   Component,
   inject,
-  OnInit,
-  OnDestroy,
   AfterViewChecked,
   ViewChild,
   ElementRef,
-  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { MatIcon } from '@angular/material/icon';
-
-import { ChatService, ChatMessage } from '../../../services/chat.service';
-import { AuthService, UserProfile } from '../../../services/auth.service';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
+import { ChatService, ChatMessage, Chat } from '../../../services/chat.service';
+import { AuthService, UserProfile } from '../../../services/auth.service';
+import { doc, docData, Firestore } from '@angular/fire/firestore';
+import { Flat, FlatService } from '../../../services/flat.service';
 
 @Component({
   selector: 'app-chat-window',
-  imports: [CommonModule, ReactiveFormsModule, MatIcon],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, RouterModule],
   templateUrl: './chat-window.component.html',
   styleUrl: './chat-window.component.css',
 })
-export class ChatWindowComponent
-  implements OnInit, AfterViewChecked, OnDestroy
-{
+export class ChatWindowComponent implements AfterViewChecked {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private chatSvc = inject(ChatService);
   private route = inject(ActivatedRoute);
+  private afs = inject(Firestore);
+  private flatSvc = inject(FlatService);
 
-  private sub = new Subscription();
-  chatId: string | null = null;
-  messages = signal<ChatMessage[]>([]);
+  private chatId$: Observable<string> = this.route.paramMap.pipe(
+    map((pm) => pm.get('chatId')),
+    filter((id): id is string => !!id)
+  );
+  chatId = toSignal(this.chatId$, { initialValue: null });
 
-  private prevLen = 0;
+  private messages$: Observable<ChatMessage[]> = this.chatId$.pipe(
+    tap((id) => void this.chatSvc.markAsRead(id).catch(console.error)),
+    switchMap((id) => this.chatSvc.listenMessages(id))
+  );
+  messages = toSignal(this.messages$, { initialValue: [] });
 
-  @ViewChild('scrollContainer', { static: false })
-  private scrollContainer!: ElementRef<HTMLDivElement>;
+  private chatDoc$: Observable<Chat> = this.chatId$.pipe(
+    switchMap(
+      (id) =>
+        docData(doc(this.afs, 'chats', id), {
+          idField: 'id',
+        }) as Observable<Chat>
+    )
+  );
+
+  private flat$: Observable<Flat & { id: string }> = this.chatDoc$.pipe(
+    map((chat) => chat.flatId),
+    switchMap((flatId) => this.flatSvc.getFlat(flatId))
+  );
+  flatSignal = toSignal(this.flat$, { initialValue: null });
 
   currentUserId = toSignal(
     this.auth.currentUser$.pipe(
@@ -54,25 +71,10 @@ export class ChatWindowComponent
     content: ['', Validators.required],
   });
 
-  ngOnInit() {
-    this.sub.add(
-      this.route.paramMap
-        .pipe(
-          map((params) => params.get('chatId')),
-          filter((id): id is string => id !== null)
-        )
-        .subscribe((id) => {
-          this.chatId = id;
-          this.sub.add(
-            this.chatSvc
-              .listenMessages(id)
-              .subscribe((msgs) => this.messages.set(msgs))
-          );
-          this.chatSvc.markAsRead(id);
-          this.form.reset();
-        })
-    );
-  }
+  @ViewChild('scrollContainer', { static: false })
+  private scrollContainer!: ElementRef<HTMLDivElement>;
+
+  private prevLen = 0;
 
   ngAfterViewChecked() {
     const msgs = this.messages();
@@ -86,8 +88,10 @@ export class ChatWindowComponent
   }
 
   async send() {
-    if (this.form.invalid || !this.chatId) return;
-    await this.chatSvc.sendMessage(this.chatId, this.form.value.content!);
+    const id = this.chatId();
+    const content = this.form.value.content?.trim();
+    if (!id || !content) return;
+    await this.chatSvc.sendMessage(id, content);
     this.form.reset();
   }
 
@@ -96,9 +100,5 @@ export class ChatWindowComponent
       event.preventDefault();
       this.send();
     }
-  }
-
-  ngOnDestroy() {
-    this.sub.unsubscribe();
   }
 }

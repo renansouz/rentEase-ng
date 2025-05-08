@@ -1,10 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { AuthService, UserProfile } from '../../../services/auth.service';
 import { ChatService, ChatPreview } from '../../../services/chat.service';
 import { ChatListComponent } from '../chat-list/chat-list.component';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, switchMap, map, shareReplay } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -13,19 +13,18 @@ import { Observable } from 'rxjs';
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.css',
 })
-export class ChatPageComponent implements OnInit {
+export class ChatPageComponent {
   private auth = inject(AuthService);
   private chatSvc = inject(ChatService);
-  private router = inject(Router);
 
-  chats$: Observable<ChatPreview[]> = this.auth.currentUser$.pipe(
+  uid$: Observable<string> = this.auth.currentUser$.pipe(
     filter((u): u is UserProfile => !!u),
-    switchMap((u) => this.chatSvc.listenChatsForUser(u.uid))
+    map((u) => u.uid),
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  ngOnInit() {}
-
-  onChatSelected(id: string) {
-    this.router.navigate(['/chat', id]);
-  }
+  chats$: Observable<ChatPreview[]> = this.uid$.pipe(
+    switchMap((uid) => this.chatSvc.listenChatsForUser(uid)),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
 }

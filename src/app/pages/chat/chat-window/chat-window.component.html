@@ -1,33 +1,59 @@
 <div class="flex flex-col h-full">
   <div
+    class="flex items-center space-x-3 p-4 bg-gray-100 border-b border-gray-300"
+  >
+    @if(flatSignal()) {
+    <img
+      [src]="flatSignal()!.photoUrl || 'fallback.png'"
+      alt="Flat"
+      class="w-12 h-12 object-cover rounded"
+    />
+    <div>
+      <div class="font-medium">
+        {{ flatSignal()!.streetNumber }}, {{ flatSignal()!.streetName }},
+        {{ flatSignal()!.city }}
+      </div>
+      <div class="text-sm text-gray-600">
+        Rent: {{ flatSignal()!.rentPrice | currency }}
+      </div>
+    </div>
+    } @else {
+    <div class="animate-pulse space-x-2">
+      <div class="bg-gray-300 rounded w-12 h-12 inline-block"></div>
+      <div class="inline-block">
+        <div class="bg-gray-300 rounded w-32 h-4 mb-1"></div>
+        <div class="bg-gray-300 rounded w-20 h-3"></div>
+      </div>
+    </div>
+    }
+  </div>
+  <div
     #scrollContainer
-    class="flex-1 sm:max-h-100dvh overflow-y-auto p-4 space-y-2 bg-white"
+    class="flex-1 sm:max-h-[calc(100dvh-155px)] overflow-y-auto p-4 space-y-2 bg-white"
   >
     @for (m of messages(); track m.id) {
     <div
       [class]="
-        'flex w-full  ' +
+        'flex w-full ' +
         (m.senderUID === currentUserId() ? 'justify-end' : 'justify-start')
       "
     >
       <div
-        class="p-2 rounded shadow-sm min-w-30 max-w-[80%] text-bold"
+        class="p-2 rounded shadow-sm min-w-30 max-w-[80%]"
         [class.bg-red-600]="m.senderUID === currentUserId()"
         [class.text-white]="m.senderUID === currentUserId()"
         [class.bg-gray-200]="m.senderUID !== currentUserId()"
       >
         <div
+          class="text-xs font-light"
           [class.text-white]="m.senderUID === currentUserId()"
-          class="text-xs text-gray-800 font-light"
         >
           {{ m.senderUID === currentUserId() ? "You" : m.senderName }}
         </div>
-        <div class="mt-1 break-words max-w-96 font-semibold">
-          {{ m.content }}
-        </div>
+        <div class="mt-1 break-words font-semibold">{{ m.content }}</div>
         <div
+          class="text-xs mt-1 font-light"
           [class.text-white]="m.senderUID === currentUserId()"
-          class="text-xs text-gray-500 mt-1 font-light"
         >
           {{ m.createdAt?.toDate() | date : "shortTime" }}
         </div>
@@ -46,13 +72,13 @@
     <textarea
       formControlName="content"
       (keydown)="handleEnter($event)"
-      class="flex-1 rounded focus:!border-none p-2 bg-gray-300"
+      class="flex-1 rounded p-2 bg-gray-200 resize-none focus:outline-none focus:ring-0"
       rows="2"
       placeholder="Type your message…"
     ></textarea>
     <button
       type="submit"
-      class="flex justify-center cursor-pointer items-center px-5 rounded-full text-red-600 hover:bg-gray-400/20 disabled:bg-none disabled:opacity-70 disabled:cursor-not-allowed"
+      class="flex justify-center items-center px-5 rounded-full text-red-600 hover:bg-gray-400/20 disabled:opacity-70 disabled:cursor-not-allowed"
       [disabled]="form.invalid"
     >
       <mat-icon>send</mat-icon>

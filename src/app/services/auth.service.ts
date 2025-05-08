@@ -6,6 +6,7 @@ import {
   getAdditionalUserInfo,
   GoogleAuthProvider,
   OAuthProvider,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -53,6 +54,15 @@ export class AuthService {
     })
   );
 
+  constructor() {
+    onAuthStateChanged(this.auth, (user) => {
+      if (user) {
+        this.setLoginTimestamp();
+        this.startAutoLogoutTimer();
+      }
+    });
+  }
+
   async register(
     email: string,
     password: string,
@@ -88,6 +98,7 @@ export class AuthService {
     this.loadingSub.next(true);
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
+      this.setLoginTimestamp();
       await this.router.navigate(['/']);
     } finally {
       this.loadingSub.next(false);
@@ -99,21 +110,7 @@ export class AuthService {
     try {
       const cred = await signInWithPopup(this.auth, new GoogleAuthProvider());
       await this._upsertSocialUser(cred);
-      await this.router.navigate(['/']);
-    } finally {
-      this.loadingSub.next(false);
-    }
-  }
-
-  async loginWithApple(): Promise<void> {
-    this.loadingSub.next(true);
-    try {
-      const provider = new OAuthProvider('apple.com');
-      provider.addScope('email');
-      provider.addScope('name');
-
-      const cred = await signInWithPopup(this.auth, provider);
-      await this._upsertSocialUser(cred);
+      this.setLoginTimestamp();
       await this.router.navigate(['/']);
     } finally {
       this.loadingSub.next(false);
@@ -154,6 +151,7 @@ export class AuthService {
     this.loadingSub.next(true);
     try {
       await signOut(this.auth);
+      localStorage.removeItem('loginTime');
       await this.router.navigate(['/login']);
     } finally {
       this.loadingSub.next(false);
@@ -202,5 +200,24 @@ export class AuthService {
         }, {} as Record<string, UserProfile>)
       )
     );
+  }
+
+  private setLoginTimestamp() {
+    localStorage.setItem('loginTime', Date.now().toString());
+  }
+
+  private startAutoLogoutTimer() {
+    const maxSessionMs = 60 * 60 * 1000;
+    const checkEveryMs = 60 * 5000;
+
+    setInterval(() => {
+      const stored = localStorage.getItem('loginTime');
+      if (!stored) return;
+
+      const loginTime = parseInt(stored, 10);
+      if (Date.now() - loginTime > maxSessionMs) {
+        this.logout();
+      }
+    }, checkEveryMs);
   }
 }

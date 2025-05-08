@@ -4,6 +4,7 @@ import {
   collection,
   collectionData,
   doc,
+  docData,
   query,
   where,
   orderBy,
@@ -11,10 +12,9 @@ import {
   setDoc,
   updateDoc,
   serverTimestamp,
-  docData,
 } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 export interface Chat {
@@ -30,7 +30,7 @@ export interface ChatPreview {
   flatId: string;
   otherUID: string;
   lastMessageAt: any;
-  lastReadAt: any;
+  lastReadAt: any | null;
   unreadMessagesCount: number;
 }
 
@@ -61,10 +61,13 @@ export class ChatService {
         [otherUID, me],
       ])
     );
+
     const existing = await firstValueFrom(
       collectionData(q, { idField: 'id' }) as Observable<Chat[]>
     );
-    if (existing[0]) return existing[0].id;
+    if (existing[0]) {
+      return existing[0].id;
+    }
 
     const chatRef = await addDoc(chatsCol, {
       flatId,
@@ -93,21 +96,20 @@ export class ChatService {
 
     return collectionData(chatsQ, { idField: 'id' }).pipe(
       switchMap((chats: any[]) => {
-        const streams = chats.map((chat) => {
+        const previews = chats.map((chat) => {
           const chatId = chat.id as string;
           const flatId = chat.flatId as string;
           const otherUID = (chat.participantsUIDs as string[]).find(
             (p) => p !== uid
           )!;
-          const lastMsgAt = chat.lastMessageAt;
 
           const partDoc = doc(
             this.firestore,
             `chats/${chatId}/participants/${uid}`
           );
-          const lastRead$ = docData(partDoc).pipe(
-            map((p: any | undefined) => p?.lastReadAt ?? null),
-            catchError(() => [null])
+          const lastReadAt$ = docData(partDoc).pipe(
+            map((p: any) => p?.lastReadAt ?? null),
+            catchError(() => of(null))
           );
 
           const msgsCol = collection(
@@ -115,29 +117,31 @@ export class ChatService {
             `chats/${chatId}/messages`
           );
 
-          return lastRead$.pipe(
+          return lastReadAt$.pipe(
             switchMap((lastReadAt) => {
               const msgsQ = lastReadAt
                 ? query(msgsCol, where('createdAt', '>', lastReadAt))
-                : query(msgsCol, orderBy('createdAt'));
-              return collectionData(msgsQ).pipe(
-                map(
-                  (msgs: any[]) =>
-                    ({
-                      chatId,
-                      flatId,
-                      otherUID,
-                      lastMessageAt: lastMsgAt,
-                      lastReadAt,
-                      unreadMessagesCount: msgs.length,
-                    } as ChatPreview)
-                )
-              );
-            })
+                : query(msgsCol);
+              return collectionData(msgsQ, { idField: 'id' });
+            }),
+            map(
+              (msgs: any[]) => msgs.filter((m) => m.senderUID !== uid).length
+            ),
+            map(
+              (unreadCount) =>
+                ({
+                  chatId,
+                  flatId,
+                  otherUID,
+                  lastMessageAt: chat.lastMessageAt,
+                  lastReadAt: null,
+                  unreadMessagesCount: unreadCount,
+                } as ChatPreview)
+            )
           );
         });
 
-        return combineLatest(streams);
+        return combineLatest(previews);
       })
     );
   }
@@ -155,8 +159,8 @@ export class ChatService {
     const msgsCol = collection(this.firestore, `chats/${chatId}/messages`);
     await addDoc(msgsCol, {
       senderUID: user.uid,
-      senderName: `${user.firstName} ${user.lastName}`.trim(),
-      senderEmail: user.email ?? '',
+      senderName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      senderEmail: user.email || '',
       content,
       createdAt: serverTimestamp(),
     });
@@ -175,6 +179,8 @@ export class ChatService {
     );
     try {
       await updateDoc(partDoc, { lastReadAt: serverTimestamp() });
-    } catch {}
+    } catch {
+      console.log('error not found');
+    }
   }
 }

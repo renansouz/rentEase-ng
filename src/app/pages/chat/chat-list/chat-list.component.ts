@@ -1,17 +1,10 @@
-import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
-
 import { RouterLink, RouterLinkActive } from '@angular/router';
-
 import { ChatPreview } from '../../../services/chat.service';
-import { Flat, FlatService } from '../../../services/flat.service';
-import { map } from 'rxjs';
-
-interface EnrichedPreview extends ChatPreview {
-  photoUrl: string;
-  title: string;
-}
+import { FlatService, Flat } from '../../../services/flat.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat-list',
@@ -21,7 +14,7 @@ interface EnrichedPreview extends ChatPreview {
 })
 export class ChatListComponent {
   @Input() chats: ChatPreview[] = [];
-  @Output() chatClicked = new EventEmitter<string>();
+  @Input() currentUid: string | null = null;
 
   private flatSvc = inject(FlatService);
   flats = toSignal(
@@ -31,7 +24,7 @@ export class ChatListComponent {
     { initialValue: {} as Record<string, Flat & { id: string }> }
   );
 
-  trackByChatId(_idx: number, item: ChatPreview) {
-    return item.chatId;
+  trackByChatId(_idx: number, c: ChatPreview) {
+    return c.chatId;
   }
 }

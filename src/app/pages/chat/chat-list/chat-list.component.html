@@ -7,7 +7,7 @@
     routerLinkActive="bg-gray-300"
     class="p-3 flex items-center cursor-pointer border-none hover:bg-gray-400/20 rounded-xl"
     [ngClass]="{
-      'bg-yellow-100': c.unreadMessagesCount > 0
+      'text-red-600': c.unreadMessagesCount > 0
     }"
     [routerLinkActiveOptions]="{ exact: true }"
     trackBy="trackByChatId"

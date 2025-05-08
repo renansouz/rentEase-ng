@@ -1,6 +1,8 @@
 <div class="flex h-full min-h-[calc(100dvh-56px)] bg-gray-50 -my-4">
   <aside
-    class="w-80 border-r border-gray-300 shadow-2xl overflow-auto bg-gray-200"
+    class="w-full md:w-80 md:block border-r border-gray-300 shadow-2xl overflow-auto bg-gray-200"
+    [class.hidden]="isChatOpen()"
+    [class.block]="!isChatOpen()"
   >
     <h2 class="font-semibold text-xl py-5 pl-2">Chats</h2>
 
@@ -9,8 +11,11 @@
       [currentUid]="(uid$ | async) ?? ''"
     ></app-chat-list>
   </aside>
-
-  <main class="flex-1">
+  <main
+    class="w-full md:flex-1 md:block"
+    [class.hidden]="!isChatOpen()"
+    [class.block]="isChatOpen()"
+  >
     <router-outlet></router-outlet>
   </main>
 </div>

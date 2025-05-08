@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -26,6 +26,7 @@ import { Flat, FlatService } from '../../../services/flat.service';
 })
 export class ChatWindowComponent implements AfterViewChecked {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   private auth = inject(AuthService);
   private chatSvc = inject(ChatService);
   private route = inject(ActivatedRoute);
@@ -100,5 +101,9 @@ export class ChatWindowComponent implements AfterViewChecked {
       event.preventDefault();
       this.send();
     }
+  }
+
+  goBack() {
+    this.router.navigate(['/chat']);
   }
 }

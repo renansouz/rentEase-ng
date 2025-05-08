@@ -1,46 +1,94 @@
 <header [ngClass]="headerClasses()">
   @if (user()) {
-  <div class="flex items-center space-x-4">
+
+  <div class="flex items-center space-x-2 order-1 md:order-2">
+    <nav class="hidden md:flex space-x-2 max-md:text-sm">
+      <a
+        routerLink="/"
+        routerLinkActive="!font-extrabold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+        >Home</a
+      >
+      <a
+        routerLink="/my-flats"
+        routerLinkActive="!font-extrabold"
+        class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+        >My Flats</a
+      >
+      <a
+        routerLink="/favorites"
+        routerLinkActive="!font-extrabold"
+        class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+        >Favorites</a
+      >
+      @if (user()?.isAdmin) {
+      <a
+        routerLink="/users"
+        routerLinkActive="!font-extrabold"
+        class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
+        >All Users</a
+      >
+      }
+    </nav>
+
+    <button
+      mat-icon-button
+      class="md:!hidden !text-gray-100"
+      [matMenuTriggerFor]="navMenu"
+      aria-label="Open navigation menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #navMenu="matMenu">
+      <button
+        mat-menu-item
+        routerLink="/"
+        routerLinkActive="!font-extrabold"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </button>
+      <button
+        mat-menu-item
+        routerLink="/my-flats"
+        routerLinkActive="!font-extrabold"
+      >
+        <mat-icon>apartment</mat-icon>
+        <span>My Flats</span>
+      </button>
+      <button
+        mat-menu-item
+        routerLink="/favorites"
+        routerLinkActive="!font-extrabold"
+      >
+        <mat-icon>favorite</mat-icon>
+        <span>Favorites</span>
+      </button>
+      @if (user()?.isAdmin) {
+      <button
+        mat-menu-item
+        routerLink="/users"
+        routerLinkActive="!font-extrabold"
+      >
+        <mat-icon>group</mat-icon>
+        <span>All Users</span>
+      </button>
+      }
+    </mat-menu>
+  </div>
+
+  <div class="flex items-center space-x-4 order-2 md:order-1">
     <a routerLink="/" class="flex items-center max-md:hidden">
       <img src="rentease-logo.png" alt="RentEase" class="h-8" />
     </a>
-    <span class="text-sm inline-block max-w-[12ch] truncate">
-      Hi, <span class="font-medium">{{ user()?.firstName }}</span
-      >! 👋
-    </span>
+    <span class="text-sm inline-block max-w-[15ch] truncate">
+      Hi, <span class="font-medium">{{ user()?.firstName }}</span> </span
+    >!👋
   </div>
 
-  <nav class="flex space-x-2 max-md:text-sm">
-    <a
-      routerLink="/"
-      routerLinkActive="!font-extrabold"
-      [routerLinkActiveOptions]="{ exact: true }"
-      class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
-      >Home</a
-    >
-    <a
-      routerLink="/my-flats"
-      routerLinkActive="!font-extrabold"
-      class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
-      >My Flats</a
-    >
-    <a
-      routerLink="/favorites"
-      routerLinkActive="!font-extrabold"
-      class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
-      >Favorites</a
-    >
-    @if (user()?.isAdmin) {
-    <a
-      routerLink="/users"
-      routerLinkActive="!font-extrabold"
-      class="px-3 py-2 rounded font-extralight hover:bg-gray-100/10"
-      >All Users</a
-    >
-    }
-  </nav>
-
-  <div class="flex items-center space-x-4 max-md:text-sm">
+  <div class="flex items-center space-x-4 max-md:text-sm order-3">
     <button
       mat-icon-button
       [routerLink]="['/chat']"
@@ -75,8 +123,8 @@
     </mat-menu>
   </div>
   } @else {
-  <a routerLink="/" class="flex items-center"
-    ><img src="rentease-logo-red.png" alt="RentEase" class="h-28"
-  /></a>
+  <a routerLink="/" class="flex items-center">
+    <img src="rentease-logo-red.png" alt="RentEase" class="h-28" />
+  </a>
   }
 </header>

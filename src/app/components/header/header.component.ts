@@ -48,7 +48,7 @@ export class HeaderComponent {
         'bg-gray-900',
         'sm:fixed sm:z-10 sm:w-full',
         'text-white shadow p-2',
-        'flex max-sm:flex-col max-sm:space-y-2 items-center justify-between',
+        'flex  max-sm:space-y-2 items-center justify-between',
       ].join(' ');
     }
 

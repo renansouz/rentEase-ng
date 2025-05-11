@@ -1,6 +1,6 @@
-# RentEase 🏡
+# RentEase 🏘️
 
-**RentEase** is a single-page Progressive Web App (PWA) built with Angular and Firebase that streamlines the process of finding and listing rental properties. Landlords can publish and manage flats; renters can search, favorite, and chat in real time, all in a responsive, mobile-first interface powered by Tailwind CSS.
+**RentEase** is a single-page application (SPA) built with Angular and Firebase that streamlines the process of finding and listing rental properties. Landlords can publish and manage flats; renters can search, favorite, and chat in real time, all in a responsive, mobile-first interface powered by Tailwind CSS.
 
 🔗 **Live Demo**  
 https://rentease-greystone.web.app/

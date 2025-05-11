@@ -1,7 +1,7 @@
 <ul class="divide-y sm:max-h-[calc(100dvh-155px)] px-1">
-  @if (!chats || chats.length === 0) {
+  @if (!chats || chats().length === 0) {
   <li class="p-3 text-center mt-[10%] text-gray-500">No conversations yet.</li>
-  } @for (c of chats; track c.chatId) {
+  } @for (c of chats(); track c.chatId) {
   <li
     [routerLink]="['/chat', c.chatId]"
     routerLinkActive="bg-gray-300"

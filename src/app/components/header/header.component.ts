@@ -95,5 +95,6 @@ export class HeaderComponent {
 
   deleteAccount() {
     this.auth.deleteAccount();
+    this.auth.logout();
   }
 }

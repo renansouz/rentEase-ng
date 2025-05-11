@@ -124,7 +124,12 @@
   </div>
   } @else {
   <a routerLink="/" class="flex items-center">
-    <img src="rentease-logo-red.png" alt="RentEase" class="h-28" />
+    <img
+      (click)="logout()"
+      src="rentease-logo-red.png"
+      alt="RentEase"
+      class="h-28"
+    />
   </a>
   }
 </header>

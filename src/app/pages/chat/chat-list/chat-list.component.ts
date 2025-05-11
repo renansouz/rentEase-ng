@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ChatPreview } from '../../../services/chat.service';
@@ -13,8 +13,8 @@ import { map } from 'rxjs/operators';
   styleUrl: './chat-list.component.css',
 })
 export class ChatListComponent {
-  @Input() chats: ChatPreview[] = [];
-  @Input() currentUid: string | null = null;
+  readonly chats = input<ChatPreview[]>([]);
+  readonly currentUid = input<string | null>(null);
 
   private flatSvc = inject(FlatService);
   flats = toSignal(
